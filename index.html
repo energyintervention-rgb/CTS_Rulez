@@ -510,7 +510,9 @@ tr.unusual-row td{background:rgba(239,68,68,.04);}
         <div class="legend">
           <span><span class="leg-dot" style="background:#00d4aa;"></span>Off-peak</span>
           <span><span class="leg-dot" style="background:#f59e0b;"></span>Peak (14–22)</span>
-          <span><span class="leg-dot" style="background:#ef4444;"></span>Unusual</span>
+          <span><span class="leg-dot" style="background:#ef4444;border-radius:0;"></span>Unusual</span>
+          <span><span style="display:inline-block;width:14px;height:2px;background:#f59e0b;border-radius:1px;vertical-align:middle;margin-right:3px;"></span>Rolling avg</span>
+          <span><span style="display:inline-block;width:14px;height:0;border-top:2px dashed #ef4444;vertical-align:middle;margin-right:3px;"></span>Overall avg</span>
         </div>
         <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">scroll to zoom · drag to pan</span>
         <button onclick="if(energyChart){energyChart.resetZoom();}" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:5px;padding:2px 9px;font-size:10px;font-family:var(--mono);cursor:pointer;">Reset</button>
