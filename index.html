@@ -3,14 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0a0e14">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CTS Rulez">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
-<link rel="manifest" href="manifest.json">
 <title>CTS Rulez — Energy Eye Live Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -31,7 +23,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 /* header */
 header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
 .logo{display:flex;align-items:center;gap:10px;}
-.logo-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#006bff);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;}
 .logo-text{font-size:16px;font-weight:600;letter-spacing:-.3px;}
 .logo-sub{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
 .hdr-right{display:flex;align-items:center;gap:8px;}
@@ -219,7 +211,7 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
 <body>
 
 <div id="splash">
-  <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" rx="18" fill="#1a2550"/><text x="48" y="57" font-family="Arial Black,Arial,sans-serif" font-size="34" font-weight="900" fill="white" text-anchor="middle">CTS</text><circle cx="10" cy="32" r="5" fill="none" stroke="#6abf4b" stroke-width="3.5"/></svg>
+  <div style="font-size:40px;font-family:var(--mono);font-weight:700;color:var(--accent);letter-spacing:-2px;">⚡ CTS</div>
   <div style="font-size:20px;font-weight:600;">CTS Rulez — Energy Eye Live Dashboard</div>
   <div style="font-size:12px;color:var(--muted);font-family:var(--mono);">device: energy-test-001 · TNB Tariff July 2025 · MYT</div>
   <button class="splash-btn" onclick="pickFile()">Select teraterm.log</button>
@@ -299,10 +291,10 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
 <div class="wrap">
   <header>
     <div class="logo">
-      <div class="logo-icon"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><rect width="36" height="36" rx="8" fill="#1a2550"/><text x="22" y="27" font-family="Arial Black,Arial,sans-serif" font-size="15" font-weight="900" fill="white" text-anchor="middle">CTS</text><circle cx="5" cy="14" r="2.2" fill="none" stroke="#6abf4b" stroke-width="1.8"/></svg></div>
+      <div class="logo-icon">CTS</div>
       <div>
         <div class="logo-text">CTS Rulez — Energy Eye Live</div>
-        <div class="logo-sub" id="logoSub">energy-test · zizi.aswandi@citytechnical.asia · © 2026</div>
+        <div class="logo-sub" id="logoSub">energy-test-001 · 1 pulse = 1 Wh · TNB tariff July 2025</div>
       </div>
     </div>
     <div class="hdr-right">
@@ -438,10 +430,9 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
     <div id="rangePicker" style="display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;width:100%;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
         <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">From:</span>
-        <input type="date" id="rangeFrom" style="background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:11px;font-family:var(--mono);">
+        <input type="date" id="rangeFrom" onchange="applyRangeFilter()" style="background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:11px;font-family:var(--mono);">
         <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">To:</span>
-        <input type="date" id="rangeTo" style="background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:11px;font-family:var(--mono);">
-        <button onclick="applyRangeFilter()" style="background:rgba(0,212,170,.15);color:#00d4aa;border:1px solid rgba(0,212,170,.4);border-radius:5px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;font-weight:600;">Apply</button>
+        <input type="date" id="rangeTo" onchange="applyRangeFilter()" style="background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:11px;font-family:var(--mono);">
         <button onclick="resetRangeFilter()" style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);border-radius:5px;padding:3px 10px;font-size:10px;font-family:var(--mono);cursor:pointer;">✕ Reset</button>
         <span id="rangeLabel" style="font-size:10px;color:var(--accent);font-family:var(--mono);"></span>
       </div>
@@ -670,7 +661,7 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
     <!-- header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <div>
-        <div style="display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="36" height="36" rx="8" fill="#1a2550"/><text x="22" y="27" font-family="Arial Black,Arial,sans-serif" font-size="15" font-weight="900" fill="white" text-anchor="middle">CTS</text><circle cx="5" cy="14" r="2.2" fill="none" stroke="#6abf4b" stroke-width="1.8"/></svg><div style="font-size:15px;font-weight:600;color:var(--text);">CTS Rulez — How to Use</div></div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);">⚡ CTS Rulez — How to Use</div>
         <div style="font-size:10px;color:var(--muted);font-family:var(--mono);">Energy Eye Dashboard · TNB Malaysia · Peninsular</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
@@ -1063,7 +1054,7 @@ function parseLog(text){
   // lastLogTs for stale detection (use last TS line)
   let lastLogTs=null;
   for(let i=lines.length-1;i>=0;i--){ const m=tsRe.exec(lines[i]); if(m){lastLogTs=parseLogTs(m[1]);break;} }
-  set('dateSource','(PC clock — device RTC diff)');
+  set('dateSource','(PC clock via TeraTerm LOG TS)');
   console.log('EE-TIME: buckets='+_allBucketLines.length+' devRtc='+_devRtcMap.size+' lastDevRtc='+_lastDevRtcSec);
 
   const res=[];
@@ -1073,15 +1064,26 @@ function parseLog(text){
     const tsm=tsRe.exec(lines[i]);const thisLogTs=tsm?parseLogTs(tsm[1]):null;
     let actualTime='',rtcHour=-1,isWeekday=true,bucketDate=`${nowD.getFullYear()}-${String(nowD.getMonth()+1).padStart(2,'0')}-${String(nowD.getDate()).padStart(2,'0')}`;
 
-    // RTC = nowMs - secondsAgo where secondsAgo comes from _bucketCum
-    // _bucketCum: latest bucket=0, each earlier bucket = cumulative diff from TS
+    // RTC (MYT) = real wall-clock time for this bucket
+    // Priority: 1) TeraTerm LOG TS on same line (most accurate PC clock)
+    //           2) nowMs - secondsAgo from device RTC diff (fallback)
     {
-      const secondsAgo = _bucketCum.has(i) ? _bucketCum.get(i) : 0;
-      const d = new Date(nowMs - secondsAgo*1000);
-      const h=d.getHours(), m2=d.getMinutes(), s=d.getSeconds();
-      actualTime=`${String(h).padStart(2,'0')}:${String(m2).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      rtcHour=h; isWeekday=d.getDay()>=1&&d.getDay()<=5;
-      bucketDate=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if(thisLogTs){
+        // Use TeraTerm PC timestamp directly — this IS the real time
+        const d=new Date(thisLogTs);
+        const h=d.getHours(), m2=d.getMinutes(), s=d.getSeconds();
+        actualTime=`${String(h).padStart(2,'0')}:${String(m2).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        rtcHour=h; isWeekday=d.getDay()>=1&&d.getDay()<=5;
+        bucketDate=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      } else {
+        // Fallback: nowMs minus device RTC diff
+        const secondsAgo = _bucketCum.has(i) ? _bucketCum.get(i) : 0;
+        const d = new Date(nowMs - secondsAgo*1000);
+        const h=d.getHours(), m2=d.getMinutes(), s=d.getSeconds();
+        actualTime=`${String(h).padStart(2,'0')}:${String(m2).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        rtcHour=h; isWeekday=d.getDay()>=1&&d.getDay()<=5;
+        bucketDate=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      }
     }
     // Read device RTC for LOG TS column from pre-built map
     let deviceRtc='';
@@ -2199,11 +2201,16 @@ function populateTimeSelectors(){
 }
 
 function resetRangeFilter(){
+  // reset dates to full range
   if(_allDates.length){
     document.getElementById('rangeFrom').value=_allDates[0];
     document.getElementById('rangeTo').value=_allDates[_allDates.length-1];
-    const lbl=document.getElementById('rangeLabel');if(lbl)lbl.textContent='';
+    document.getElementById('sliderFrom').value=0;
+    document.getElementById('sliderTo').value=_allDates.length-1;
+    updateRangeTrack();
+    updateRangeLabel();
   }
+  // go back to All
   timeFilterMin='all';
   document.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tf-all').classList.add('active');
