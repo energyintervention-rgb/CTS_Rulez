@@ -1953,10 +1953,27 @@ function updateKwhStackChart(d){
     fmtLabels=allHours.map(h=>h+':00');
     // Today data coloured by peak/off-peak
     const todayTotals=allHours.map(h=>todayHMap[h]?+((todayHMap[h].peak+todayHMap[h].off).toFixed(4)):0);
+
+    // ── Graph coloring rule ────────────────────────────────────────────
+    // Today off-peak all day + Yesterday off-peak all day → off-peak color (green/teal)
+    // Today off-peak all day + Yesterday had peak hours   → keep peak color (orange)
+    // Today has peak hours                                → peak color (orange)
+    const todayHasPeak=tDay.some(r=>r.isPeak);
+    const yestHasPeak=yDay.some(r=>r.isPeak);
+    const todayAllOffPeak=!todayHasPeak;
+    const useOffPeakColor=todayAllOffPeak&&!yestHasPeak; // only go green if BOTH days are off-peak
+
     const todayColors=allHours.map(h=>{
       if(!todayHMap[h]) return 'rgba(0,212,170,0.1)';
       const hh=parseInt(h);
-      return hh>=PEAK_START&&hh<PEAK_END?'rgba(245,158,11,0.85)':'rgba(0,212,170,0.65)';
+      const isHourPeak=hh>=PEAK_START&&hh<PEAK_END;
+      if(useOffPeakColor){
+        // Both today and yesterday off-peak all day → all bars green/teal
+        return 'rgba(0,212,170,0.65)';
+      } else {
+        // Today has peak OR yesterday had peak → colour by hour slot as normal
+        return isHourPeak?'rgba(245,158,11,0.85)':'rgba(0,212,170,0.65)';
+      }
     });
     // Yesterday data — transparent with border
     const yestTotals=allHours.map(h=>yestHMap[h]?+((yestHMap[h].peak+yestHMap[h].off).toFixed(4)):0);
