@@ -178,7 +178,9 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
   .logo-text{font-size:13px;}
   .logo-sub{font-size:9px;white-space:normal;}
   .hdr-right{width:100%;flex-wrap:wrap;gap:4px;}
-  .hdr-right .sel,.hdr-right .btn,.hdr-right .btn-ghost{font-size:10px;padding:4px 8px;}
+  .hdr-right .sel,.hdr-right .btn,.hdr-right .btn-ghost{font-size:10px;padding:0 8px;height:28px;}
+  .live-badge{height:28px;font-size:10px;padding:0 8px;}
+  #dsp-fab-btn{font-size:10px!important;height:28px!important;padding:0 8px!important;}
   .sbar{font-size:10px;flex-direction:column;gap:2px;padding:6px 10px;}
   .sbar>.sep{display:none;}
   .tf-btn{padding:4px 8px;font-size:10px;}
@@ -205,9 +207,9 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
   .tcontrols{flex-wrap:wrap;gap:5px;}
   .t-input{width:110px;font-size:10px;}
   .t-sel{font-size:10px;}
-  #dsp-fab-btn{font-size:10px!important;padding:5px 8px!important;}
   #dsp-panel{width:100vw!important;}
   [id^='tr-'],[id^='ph-']{font-size:10px;padding:4px 8px;}
+  #statusDeviceModal>div{border-radius:0;margin:0;min-height:100vh;}
 }
 @media screen and (min-width:600px) and (max-width:900px) and (orientation:portrait){
   .metrics{grid-template-columns:repeat(4,minmax(0,1fr));}
@@ -305,11 +307,11 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
         <div class="logo-sub" id="logoSub">energy-test-001 · 1 pulse = 1 Wh · TNB tariff July 2025</div>
       </div>
     </div>
-    <div class="hdr-right" style="align-items:stretch;">
-      <div id="dsp-fab" style="font-family:var(--mono);position:relative;display:flex;align-items:stretch;">
+    <div class="hdr-right">
+      <div id="dsp-fab" style="font-family:var(--mono);position:relative;">
 
-  <button id="dsp-fab-btn" onclick="dspToggle()" style="background:#1a2535;border:1px solid #2d4060;border-radius:8px;padding:0 14px;color:#9ca3af;font-size:11px;font-family:var(--mono);cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 2px 12px rgba(0,0,0,.5);height:32px;">
-    <span id="dsp-fab-dot" style="width:7px;height:7px;border-radius:50%;background:#00d4aa;display:inline-block;animation:blink 1.4s ease-in-out infinite;"></span>
+  <button id="dsp-fab-btn" onclick="dspToggle()" style="background:#1a2535;border:1px solid #2d4060;border-radius:8px;padding:0 14px;color:#9ca3af;font-size:11px;font-family:var(--mono);cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:0 2px 12px rgba(0,0,0,.5);height:32px;white-space:nowrap;">
+    <span id="dsp-fab-dot" style="width:7px;height:7px;border-radius:50%;background:#00d4aa;display:inline-block;animation:blink 1.4s ease-in-out infinite;flex-shrink:0;"></span>
     <span>Device Status</span>
     <span id="dsp-fab-arrow" style="font-size:10px;">▲</span>
   </button>
@@ -342,18 +344,18 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
     <div id="dsp-paused-banner" style="display:none;background:rgba(245,158,11,.1);border-top:1px solid rgba(245,158,11,.2);padding:6px 12px;color:#f59e0b;font-size:10px;text-align:center;">⏸ Updates paused — click Resume to restart</div>
   </div>
 </div>
-      <select class="sel" id="intervalSel" onchange="changeInterval()" style="height:32px;padding:0 8px;display:flex;align-items:center;">
+      <select class="sel" id="intervalSel" onchange="changeInterval()">
         <option value="3000">Refresh: 3s</option>
         <option value="5000">Refresh: 5s</option>
         <option value="10000">Refresh: 10s</option>
         <option value="30000">Refresh: 30s</option>
       </select>
-      <button id="stopResumeBtn" class="btn-ghost" onclick="togglePolling()" style="border-color:rgba(239,68,68,.4);color:#f87171;height:32px;padding:0 13px;">⏹ Stop</button>
-      <div class="live-badge" style="height:32px;padding:0 10px;"><div class="live-dot off" id="liveDot"></div><span id="liveLabel">WAITING</span></div>
-      <button class="btn-ghost" onclick="savePDF()" title="Save as PDF" style="height:32px;padding:0 10px;">🖨</button>
-      <button class="btn-ghost" onclick="showHelp()" style="border-color:rgba(59,130,246,.4);color:#60a5fa;height:32px;padding:0 13px;">? Help</button>
-      <button class="btn-ghost" onclick="openStatusPage()" style="border-color:rgba(0,212,170,.4);color:var(--accent);height:32px;padding:0 13px;">📡 Status Device</button>
-      <button class="btn" onclick="pickFile()" style="height:32px;padding:0 13px;">Change file</button>
+      <button id="stopResumeBtn" class="btn-ghost" onclick="togglePolling()" style="border-color:rgba(239,68,68,.4);color:#f87171;">⏹ Stop</button>
+      <div class="live-badge"><div class="live-dot off" id="liveDot"></div><span id="liveLabel">WAITING</span></div>
+      <button class="btn-ghost" onclick="savePDF()" title="Save as PDF">🖨</button>
+      <button class="btn-ghost" onclick="showHelp()" style="border-color:rgba(59,130,246,.4);color:#60a5fa;">? Help</button>
+      <button class="btn-ghost" onclick="openStatusPage()" style="border-color:rgba(0,212,170,.4);color:var(--accent);">📡 Status Device</button>
+      <button class="btn" onclick="pickFile()">Change file</button>
     </div>
   </header>
 
@@ -398,7 +400,7 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
   <div class="sbar">
     <span>File:<strong id="fileName">—</strong></span><span class="sep">|</span>
     <span>Size:<strong id="fileSize">—</strong></span><span class="sep">|</span>
-    <span>Date:<strong id="logDate">—</strong> <span id="dateSource" style="color:var(--warn);font-size:10px;"></span></span><span class="sep">|</span>
+    <span>Date:<strong id="logDate">—</strong> <span id="dateSource" title="RTC time source" style="font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.2);">⚠️ PC Clock</span></span><span class="sep">|</span>
     <span>Buckets:<strong id="bucketCount">—</strong></span><span class="sep">|</span>
     <span>Last read:<strong id="lastUpdate">—</strong></span><span class="sep">|</span>
     <span style="display:flex;align-items:center;gap:6px;">
@@ -1058,8 +1060,29 @@ function parseLog(text){
   // lastLogTs for stale detection (use last TS line)
   let lastLogTs=null;
   for(let i=lines.length-1;i>=0;i--){ const m=tsRe.exec(lines[i]); if(m){lastLogTs=parseLogTs(m[1]);break;} }
-  set('dateSource','(PC clock — device RTC diff)');
-  console.log('EE-TIME: buckets='+_allBucketLines.length+' devRtc='+_devRtcMap.size+' lastDevRtc='+_lastDevRtcSec);
+
+  // ── RTC ANCHOR: CCLK (Tera Term) is primary; fall back to PC clock ──
+  // When CCLK is valid, the LAST bucket anchors to cclkDate+cclkTime.
+  // All earlier buckets walk backward by cumulative RTC diffs.
+  let _anchorMs;
+  if(cclkFound && cclkDate && cclkTime){
+    _anchorMs = new Date(cclkDate+'T'+cclkTime).getTime();
+    const dsEl=document.getElementById('dateSource');
+    if(dsEl){
+      dsEl.textContent='✅ CCLK (Tera Term)';
+      dsEl.style.cssText='font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:4px;background:rgba(16,185,129,.12);color:var(--success);border:1px solid rgba(16,185,129,.25);';
+      dsEl.title='Date/time anchored to +CCLK from Tera Term: '+cclkDate+' '+cclkTime;
+    }
+  } else {
+    _anchorMs = nowMs;
+    const dsEl=document.getElementById('dateSource');
+    if(dsEl){
+      dsEl.textContent='⚠️ PC Clock fallback';
+      dsEl.style.cssText='font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.2);';
+      dsEl.title='No valid +CCLK found in log — using PC clock as time reference';
+    }
+  }
+  console.log('EE-TIME: buckets='+_allBucketLines.length+' devRtc='+_devRtcMap.size+' anchor='+(cclkFound?'CCLK:'+cclkDate+'T'+cclkTime:'PC'));
 
   const res=[];
   let _dbgCount=0;
@@ -1068,11 +1091,10 @@ function parseLog(text){
     const tsm=tsRe.exec(lines[i]);const thisLogTs=tsm?parseLogTs(tsm[1]):null;
     let actualTime='',rtcHour=-1,isWeekday=true,bucketDate=`${nowD.getFullYear()}-${String(nowD.getMonth()+1).padStart(2,'0')}-${String(nowD.getDate()).padStart(2,'0')}`;
 
-    // RTC = nowMs - secondsAgo where secondsAgo comes from _bucketCum
-    // _bucketCum: latest bucket=0, each earlier bucket = cumulative diff from TS
+    // RTC = anchorMs - secondsAgo (CCLK anchor if available, else PC clock)
     {
       const secondsAgo = _bucketCum.has(i) ? _bucketCum.get(i) : 0;
-      const d = new Date(nowMs - secondsAgo*1000);
+      const d = new Date(_anchorMs - secondsAgo*1000);
       const h=d.getHours(), m2=d.getMinutes(), s=d.getSeconds();
       actualTime=`${String(h).padStart(2,'0')}:${String(m2).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
       rtcHour=h; isWeekday=d.getDay()>=1&&d.getDay()<=5;
@@ -1802,6 +1824,15 @@ function updateDeviceStatus(text){
       lbl.textContent='Device Fail — see Status ↗';if(cardDiv)cardDiv.style.cursor='pointer';
     }
   }
+  // Save for Status Device page — detect CCLK from the log
+  const _cclkRe2=/\+CCLK:\s*"(\d+)\/(\d+)\/(\d+),(\d+):(\d+):(\d+)/;
+  let _sdCclkActive=false,_sdCclkDate='',_sdCclkTime='';
+  for(const l of lines){
+    const m2=_cclkRe2.exec(l);
+    if(m2){_sdCclkDate=`20${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')}`;_sdCclkTime=`${m2[4].padStart(2,'0')}:${m2[5].padStart(2,'0')}:${m2[6].padStart(2,'0')}`;_sdCclkActive=parseInt(_sdCclkDate.slice(0,4))>=2020;break;}
+  }
+  _sdLastState={modem,sim,txResult,battery,cclk,txOk,txFail,events,cclkActive:_sdCclkActive,cclkDate:_sdCclkDate,cclkTime:_sdCclkTime};
+  if(document.getElementById('statusDeviceModal')?.style.display==='flex') _renderStatusPage();
 }
 
 function updateCharts(){
@@ -2758,6 +2789,18 @@ window.addEventListener('load',()=>{
   attachZoom(()=>mainChart);
 });
 
+// Close Status Device modal on Escape or backdrop click
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const m=document.getElementById('statusDeviceModal');
+    if(m&&m.style.display==='flex') m.style.display='none';
+  }
+});
+document.addEventListener('click',e=>{
+  const m=document.getElementById('statusDeviceModal');
+  if(m&&e.target===m) m.style.display='none';
+});
+
 
 let _dspVisible=false, _dspPaused=false;
 function dspToggle(){
@@ -2778,77 +2821,14 @@ function dspPause(){
   dot.style.background=_dspPaused?'#f59e0b':'#00d4aa';
   dot.style.animation=_dspPaused?'none':'blink 1.4s ease-in-out infinite';
 }
-// Wrap updateDeviceStatus to skip when paused
-const _dspOrig=updateDeviceStatus;
-updateDeviceStatus=function(text){ if(!_dspPaused) _dspOrig(text); };
-
-// ── STATUS DEVICE PAGE ──────────────────────────────────────────────────
-let _sdLastState=null; // {modem,sim,txResult,battery,cclk,txOk,txFail,events,cclkFound,cclkDate,cclkTime}
-
-// Patch updateDeviceStatus to also save state for Status page
-const _dspOrig2=updateDeviceStatus;
+// Single wrap: pause guard (state is saved inside updateDeviceStatus itself)
+const _dspOrigFn=updateDeviceStatus;
 updateDeviceStatus=function(text){
-  // still call the existing wrapped version (handles pause)
-  _dspOrig2(text);
-  // extract events+state again for Status page (lightweight re-parse)
-  try{ _buildSdState(text); }catch(e){}
+  if(!_dspPaused) _dspOrigFn(text);
 };
 
-function _buildSdState(text){
-  // Re-uses the same parse logic from updateDeviceStatus but saves the result
-  const lines=text.split('\n');
-  const rtcRe2=/RTC Time!\s*(\d+):(\d+):(\d+)/;
-  const tsRe2=/\[(\d{2}:\d{2}:\d{2})\]/;
-  const cclkRe2=/\+CCLK:\s*"(\d+)\/(\d+)\/(\d+),(\d+):(\d+):(\d+)/;
-  // Get CCLK
-  let cclkFound=false,cclkDate='',cclkTime2='';
-  for(const l of lines){
-    const m=cclkRe2.exec(l);
-    if(m){cclkDate=`20${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;cclkTime2=`${m[4].padStart(2,'0')}:${m[5].padStart(2,'0')}:${m[6].padStart(2,'0')}`;cclkFound=true;break;}
-  }
-  // Build lineRtc map
-  const lineRtc={};
-  for(let i=0;i<lines.length;i++){
-    const m=rtcRe2.exec(lines[i]);
-    if(m) lineRtc[i]=`${m[1]}:${String(m[2]).padStart(2,'0')}:${String(m[3]).padStart(2,'0')}`;
-  }
-  const getTime=idx=>{
-    if(lineRtc[idx]) return lineRtc[idx];
-    const m=tsRe2.exec(lines[idx]||'');
-    return m?m[1]:'—';
-  };
-  let modem='—',sim='—',txResult='—',battery='—',cclk='—';
-  let txOk=0,txFail=0;
-  const events=[];
-  for(let i=0;i<lines.length;i++){
-    const l=lines[i];const ts=getTime(i);
-    if(l.includes('Cold boot path')){modem='Cold boot';events.push({ts,type:'BOOT',msg:'Cold boot — modem powering up',col:'#f59e0b'});}
-    if(l.includes('PWRKEY PRESS')){modem='PWRKEY pressed';}
-    if(l.includes('Running autobaud')){modem='Baud lock...';events.push({ts,type:'MODEM',msg:'Autobaud/baud-lock running',col:'#5a6a7e'});}
-    if(l.includes('Autobaud/baud-lock failed')){modem='Baud lock FAIL';events.push({ts,type:'ERR',msg:'Autobaud failed — skip publish',col:'#ef4444'});}
-    if(l.match(/^[^[]*RDY\s*$/)){modem='RDY';events.push({ts,type:'MODEM',msg:'Modem RDY',col:'#00d4aa'});}
-    if(l.includes('+CFUN: 1')){modem='CFUN:1 (full)';}
-    if(l.includes('+CPIN: READY')){sim='READY';events.push({ts,type:'SIM',msg:'SIM: CPIN READY',col:'#00d4aa'});}
-    if(l.includes('+CPIN: NOT READY')||l.includes('+CPIN: NO SIM')){sim='NOT READY';events.push({ts,type:'SIM',msg:'SIM: NOT READY',col:'#ef4444'});}
-    if(l.includes('SMS Ready')){modem='SMS Ready';}
-    if(l.includes('+CREG: 1')||l.includes('+CREG: 5')){modem='Registered';events.push({ts,type:'NET',msg:'Network registered',col:'#00d4aa'});}
-    if(l.includes('+CGATT: 1')){modem='GPRS attached';events.push({ts,type:'NET',msg:'GPRS attached',col:'#00d4aa'});}
-    if(l.includes('[TX] result = OK')||l.includes('result = OK')){txResult='OK';txOk++;events.push({ts,type:'TX',msg:'Data published OK',col:'#00d4aa'});}
-    if(l.includes('[TX] result = FAIL')||l.includes('result = FAIL')){txResult='FAIL';txFail++;events.push({ts,type:'TX',msg:'Publish FAILED — skip cycle',col:'#ef4444'});}
-    if(l.includes('Cellular engine failed')){txResult='ENGINE FAIL';events.push({ts,type:'ERR',msg:'Cellular engine failed',col:'#ef4444'});}
-    const battM=l.match(/Battery\s*:\s*([\d.]+)/);
-    if(battM){battery=parseFloat(battM[1]).toFixed(2)+'V';}
-    if(l.includes('[TIME][CCLK]')){cclk='Querying...';}
-    if(l.includes('+CCLK:')){const cm=l.match(/\+CCLK: "(.+)"/);cclk=cm?cm[1].slice(0,14):'Synced';events.push({ts,type:'CLOCK',msg:'Clock synced: '+cclk,col:'#60a5fa'});}
-    if(l.includes('[PAYLOAD] V2')){events.push({ts,type:'DATA',msg:'Payload sent to server',col:'#a78bfa'});}
-    const bucketM=l.match(/\[BUCKET\] idx=(\d+)/);
-    if(bucketM&&parseInt(bucketM[1])%50===0){events.push({ts,type:'BUCKET',msg:'Bucket #'+bucketM[1],col:'#5a6a7e'});}
-  }
-  const cclkActive=cclkFound&&cclkDate;
-  _sdLastState={modem,sim,txResult,battery,cclk,txOk,txFail,events,cclkActive,cclkDate,cclkTime:cclkTime2};
-  // live-refresh Status page if open
-  if(document.getElementById('statusDeviceModal')?.style.display==='flex') _renderStatusPage();
-}
+// ── STATUS DEVICE PAGE ──────────────────────────────────────────────────
+let _sdLastState=null;
 
 function openStatusPage(){
   document.getElementById('statusDeviceModal').style.display='flex';
