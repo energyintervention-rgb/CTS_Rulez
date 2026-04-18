@@ -2330,74 +2330,85 @@ function applyFilter(){
 }
 
 // ── AVG KWH — Dashboard Reporting Rules ──────────────────────────────
-// 15 min  → latestBucketKwh.toFixed(4)          → "kWh (15 min) · N buckets"
-// 1 hour  → latestBucketKwh.toFixed(4)          → "kWh (1 hour) · N buckets"
-// 1 day   → latestBucketKwh.toFixed(4)          → "kWh (1 day) · N buckets"
-// 1 week  → (totalKwh ÷ uniqueDays).toFixed(4)  → "kWh/day avg · N days"
-// 1 month → (totalKwh ÷ uniqueDays).toFixed(4)  → "kWh/day avg · N days"
-// 1 year  → (totalKwh ÷ weeks).toFixed(4)       → "kWh/week avg · N weeks"
-// Range   → (totalKwh ÷ uniqueDays).toFixed(4)  → "kWh/day avg · N days"
-// All     → (totalKwh ÷ uniqueDays).toFixed(4)  → "kWh/day avg · N days"
+// 15 min  → latestBucketKwh                              → "kWh (15 min) · N buckets"
+// 1 hour  → totalKwhPrevHour ÷ numBucketsPrevHour        → "kWh (1 hour avg) · Prev hour · N buckets"
+// 1 day   → totalKwh ÷ maxReceivedHoursOrBuckets         → "kWh/day avg · YYYY-MM-DD · Nh received · N buckets"
+// 1 week  → totalKwh ÷ maxReceivedDays (cap 7)           → "kWh/day avg · 1 week · Nd received · N buckets"
+// 1 month → totalKwh ÷ uniqueDays                        → "kWh/day avg · N days"
+// 1 year  → totalKwh ÷ weeks                             → "kWh/week avg · N weeks"
+// Range   → totalKwh ÷ uniqueDays                        → "kWh/day avg · N days"
+// All     → totalKwh ÷ uniqueDays                        → "kWh/day avg · N days"
 function _calcAvgKwh(rows, bucketCount){
   if(!rows||!rows.length){set('s-avg-kwh','—');set('s-avg-kwh-sub','—');return;}
+
   const totalKwh=rows.reduce((s,r)=>s+r.wh,0)/1000;
-  const numDays=[...new Set(rows.map(r=>r.date).filter(Boolean))].length||1;
+  const uniqDays=[...new Set(rows.map(r=>r.date).filter(Boolean))];
+  const numDays=uniqDays.length||1;
   const tf=timeFilterMin;
 
-  // For short-window filters: find the single latest bucket by rtc timestamp
-  // rows are sorted chronologically by the caller (getViewData / filtered)
-  // The most-recent entry is rows[rows.length-1] when in normal order,
-  // but applyFilter may reverse for display — always use the max-date+rtc row.
-  const latestRow=rows.reduce((best,r)=>{
-    const ts=(r.date||'')+(r.rtc||'');
-    const bestTs=(best.date||'')+(best.rtc||'');
-    return ts>bestTs?r:best;
-  }, rows[0]);
-  const latestBucketKwh=(latestRow?latestRow.wh/1000:0);
+  // Latest bucket by max date+rtc string (display-order independent)
+  const latestRow=rows.reduce((best,r)=>
+    ((r.date||'')+(r.rtc||''))>((best.date||'')+(best.rtc||''))?r:best
+  , rows[0]);
+  const latestBucketKwh=latestRow?latestRow.wh/1000:0;
 
   let val, label, sub;
 
+  // ── 15 min ─────────────────────────────────────────────────────────
   if(tf===15){
     val=latestBucketKwh.toFixed(4);
     label='kWh (15 min)';
     sub=bucketCount+' bucket'+(bucketCount!==1?'s':'');
+
+  // ── 1 hour ─────────────────────────────────────────────────────────
+  // Previous completed hour: totalKwhPrevHour ÷ numBucketsPrevHour
   } else if(tf===60||tf===120){
-    val=latestBucketKwh.toFixed(4);
-    label='kWh (1 hour)';
-    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'');
+    const latestHour=latestRow&&latestRow.rtcHour>=0?latestRow.rtcHour:new Date().getHours();
+    const prevHour=(latestHour-1+24)%24;
+    const prevRows=rows.filter(r=>r.rtcHour===prevHour);
+    const curRows=rows.filter(r=>r.rtcHour===latestHour);
+    const useRows=prevRows.length>0?prevRows:curRows;
+    const useHour=prevRows.length>0?prevHour:latestHour;
+    const hourKwh=useRows.reduce((s,r)=>s+r.wh,0)/1000;
+    const hourBuckets=useRows.length||1;
+    val=(hourKwh/hourBuckets).toFixed(4);
+    label='kWh (1 hour avg)';
+    sub=String(useHour).padStart(2,'0')+':00 · '+hourBuckets+' bucket'+(hourBuckets!==1?'s':'');
+
+  // ── 1 day ──────────────────────────────────────────────────────────
+  // Adaptive: totalKwh ÷ hoursReceived (cap 24)
   } else if(typeof tf==='string'&&tf.startsWith('day:')){
     const dayDate=tf.slice(4);
-    // Count distinct hours that have buckets to detect partial vs full day
-    const hours=[...new Set(rows.map(r=>r.rtc?r.rtc.slice(0,2):null).filter(Boolean))];
-    const numHours=hours.length;
-    const isFull=numHours>=24;
-    if(isFull){
-      // Full day: totalKwh for the day
-      val=totalKwh.toFixed(4);
-      label='kWh (full day)';
-      sub=dayDate+' · 24h total · '+bucketCount+' bucket'+(bucketCount!==1?'s':'');
-    } else {
-      // Partial day: accumulated kWh so far (same as totalKwh of collected buckets)
-      const accumulatedKwh=totalKwh; // sum of all buckets for this day = accumulated so far
-      val=accumulatedKwh.toFixed(4);
-      label='kWh (partial day)';
-      sub=dayDate+' · '+numHours+'h accumulated · '+bucketCount+' bucket'+(bucketCount!==1?'s':'');
-    }
-  } else if(tf===10080){
-    val=(totalKwh/numDays).toFixed(4);
+    const uniqHours=[...new Set(rows.map(r=>r.rtcHour).filter(h=>h!=null&&h>=0))];
+    const hoursReceived=Math.max(uniqHours.length,1);
+    const divisor=Math.min(hoursReceived,24);
+    val=(totalKwh/divisor).toFixed(4);
     label='kWh/day avg';
-    sub=numDays+' day'+(numDays!==1?'s':'');
+    sub=dayDate+' · '+hoursReceived+'h received · '+bucketCount+' bucket'+(bucketCount!==1?'s':'');
+
+  // ── 1 week ─────────────────────────────────────────────────────────
+  // Adaptive: totalKwh ÷ daysReceived (cap 7)
+  } else if(tf===10080){
+    const daysReceived=Math.min(numDays,7);
+    val=(totalKwh/Math.max(daysReceived,1)).toFixed(4);
+    label='kWh/day avg';
+    sub='1 week · '+daysReceived+'d received · '+bucketCount+' bucket'+(bucketCount!==1?'s':'');
+
+  // ── 1 month ────────────────────────────────────────────────────────
   } else if(tf===43200){
     val=(totalKwh/numDays).toFixed(4);
     label='kWh/day avg';
     sub=numDays+' day'+(numDays!==1?'s':'');
+
+  // ── 1 year ─────────────────────────────────────────────────────────
   } else if(tf===525600){
     const weeks=Math.max(1,Math.ceil(numDays/7));
     val=(totalKwh/weeks).toFixed(4);
     label='kWh/week avg';
     sub=weeks+' week'+(weeks!==1?'s':'');
+
+  // ── Range & All ────────────────────────────────────────────────────
   } else {
-    // Range and All
     val=(totalKwh/numDays).toFixed(4);
     label='kWh/day avg';
     sub=numDays+' day'+(numDays!==1?'s':'');
