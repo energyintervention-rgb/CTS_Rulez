@@ -2329,14 +2329,13 @@ function applyFilter(){
   renderTable();
 }
 
-// ── Unified AVG KWH calculator ─────────────────────────────────────────
-// Logic per filter type:
-//  15 min / 1 hour / any minute-based window:
-//    → avg kWh per bucket = totalKwh / buckets  (fine-grained average)
-//  1 day (full or partial):
-//    → total kWh for that day's data; label shows if partial
-//  all / range / week / month / year:
-//    → avg kWh per day across unique days in the set
+// ── AVG KWH calculator ────────────────────────────────────────────────
+// Short filters (15 min, 1 hour, 1 day):
+//   → total kWh of the latest buckets collected in that window
+//     (real-time consumption for that interval, not divided further)
+// Long ranges (week, month, year, range, all):
+//   → normalised: week/month/range = totalKwh ÷ unique days (kWh/day avg)
+//                 year              = totalKwh ÷ weeks      (kWh/week avg)
 function _calcAvgKwh(rows, bucketCount){
   if(!rows||!rows.length){set('s-avg-kwh','—');set('s-avg-kwh-sub','—');return;}
   const totalWh=rows.reduce((s,r)=>s+r.wh,0);
@@ -2345,61 +2344,63 @@ function _calcAvgKwh(rows, bucketCount){
   const numDays=uniqDays.length||1;
   const tf=timeFilterMin;
 
-  let avgVal, avgLabel, subLabel;
+  let val, label, sub;
 
   if(tf===15){
-    // Last 15 min: avg per bucket
-    const perBucket=bucketCount>0?totalKwh/bucketCount:0;
-    avgVal=perBucket.toFixed(4);
-    avgLabel='kWh/bucket avg';
-    subLabel='last 15 min · '+bucketCount+' buckets';
+    // Last 15 min — total kWh of latest buckets in window
+    val=totalKwh.toFixed(4);
+    label='kWh (15 min)';
+    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'')+' · latest interval';
+
   } else if(tf===60||tf===120){
-    // Last 1 hour: avg per bucket
-    const perBucket=bucketCount>0?totalKwh/bucketCount:0;
-    avgVal=perBucket.toFixed(4);
-    avgLabel='kWh/bucket avg';
-    subLabel='last 1 hour · '+bucketCount+' buckets';
+    // Last 1 hour — total kWh of latest buckets in window
+    val=totalKwh.toFixed(4);
+    label='kWh (1 hour)';
+    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'')+' · latest interval';
+
   } else if(typeof tf==='string'&&tf.startsWith('day:')){
-    // Specific day: total kWh for that day
-    // Check if we have a full day (all 24h buckets present) or partial
+    // Specific calendar day — total kWh for that day's collected data
     const dayDate=tf.slice(4);
-    const allDayData=allData.filter(r=>r.date===dayDate);
-    const isFullDay=allDayData.length>=rows.length&&allDayData.length>0;
-    // Compute hours spanned
     const hours=[...new Set(rows.map(r=>r.rtc?r.rtc.slice(0,2):null).filter(Boolean))].length;
-    const isPartial=hours<24;
-    avgVal=totalKwh.toFixed(3);
-    avgLabel=isPartial?'kWh (partial day)':'kWh today (full day)';
-    subLabel=dayDate+' · '+hours+' hour'+(hours!==1?'s':'')+' · '+bucketCount+' buckets';
+    const partial=hours>0&&hours<24;
+    val=totalKwh.toFixed(3);
+    label=partial?'kWh (partial day)':'kWh (full day)';
+    sub=dayDate+(hours>0?' · '+hours+'h':'')+(partial?' accumulated':' total')+' · '+bucketCount+' buckets';
+
   } else if(tf===10080){
-    // 1 week: avg per day
-    avgVal=(totalKwh/numDays).toFixed(3);
-    avgLabel='kWh/day avg';
-    subLabel='1 week · '+numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+    // 1 week — kWh/day avg
+    val=(totalKwh/numDays).toFixed(3);
+    label='kWh/day avg';
+    sub='1 week · '+numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+
   } else if(tf===43200){
-    // 1 month: avg per day
-    avgVal=(totalKwh/numDays).toFixed(3);
-    avgLabel='kWh/day avg';
-    subLabel='1 month · '+numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+    // 1 month — kWh/day avg
+    val=(totalKwh/numDays).toFixed(3);
+    label='kWh/day avg';
+    sub='1 month · '+numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+
   } else if(tf===525600){
-    // 1 year: avg per week
+    // 1 year — kWh/week avg
     const weeks=Math.max(1,Math.ceil(numDays/7));
-    avgVal=(totalKwh/weeks).toFixed(3);
-    avgLabel='kWh/week avg';
-    subLabel='1 year · '+weeks+' wk'+(weeks!==1?'s':'')+' · '+bucketCount+' buckets';
+    val=(totalKwh/weeks).toFixed(3);
+    label='kWh/week avg';
+    sub='1 year · '+weeks+' wk'+(weeks!==1?'s':'')+' ('+numDays+'d) · '+bucketCount+' buckets';
+
   } else if(typeof tf==='string'&&tf.startsWith('range:')){
-    // Date range: avg per day
-    avgVal=(totalKwh/numDays).toFixed(3);
-    avgLabel='kWh/day avg';
-    subLabel=numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+    // Custom date range — kWh/day avg
+    val=(totalKwh/numDays).toFixed(3);
+    label='kWh/day avg';
+    sub=numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+
   } else {
-    // All data: avg per day
-    avgVal=(totalKwh/numDays).toFixed(3);
-    avgLabel='kWh/day avg';
-    subLabel=numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+    // All data — kWh/day avg
+    val=(totalKwh/numDays).toFixed(3);
+    label='kWh/day avg';
+    sub=numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
   }
-  set('s-avg-kwh', avgVal);
-  set('s-avg-kwh-sub', avgLabel+' · '+subLabel);
+
+  set('s-avg-kwh', val);
+  set('s-avg-kwh-sub', label+' · '+sub);
 }
 
 function renderTable(){
