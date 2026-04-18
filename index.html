@@ -2366,9 +2366,23 @@ function _calcAvgKwh(rows, bucketCount){
     label='kWh (1 hour)';
     sub=bucketCount+' bucket'+(bucketCount!==1?'s':'');
   } else if(typeof tf==='string'&&tf.startsWith('day:')){
-    val=latestBucketKwh.toFixed(4);
-    label='kWh (1 day)';
-    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'');
+    const dayDate=tf.slice(4);
+    // Count distinct hours that have buckets to detect partial vs full day
+    const hours=[...new Set(rows.map(r=>r.rtc?r.rtc.slice(0,2):null).filter(Boolean))];
+    const numHours=hours.length;
+    const isFull=numHours>=24;
+    if(isFull){
+      // Full day: totalKwh for the day
+      val=totalKwh.toFixed(4);
+      label='kWh (full day)';
+      sub=dayDate+' · 24h total · '+bucketCount+' bucket'+(bucketCount!==1?'s':'');
+    } else {
+      // Partial day: accumulated kWh so far (same as totalKwh of collected buckets)
+      const accumulatedKwh=totalKwh; // sum of all buckets for this day = accumulated so far
+      val=accumulatedKwh.toFixed(4);
+      label='kWh (partial day)';
+      sub=dayDate+' · '+numHours+'h accumulated · '+bucketCount+' bucket'+(bucketCount!==1?'s':'');
+    }
   } else if(tf===10080){
     val=(totalKwh/numDays).toFixed(4);
     label='kWh/day avg';
