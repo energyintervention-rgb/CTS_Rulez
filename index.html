@@ -209,7 +209,6 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
   .t-sel{font-size:10px;}
   #dsp-panel{width:100vw!important;}
   [id^='tr-'],[id^='ph-']{font-size:10px;padding:4px 8px;}
-  #statusDeviceModal>div{border-radius:0;margin:0;min-height:100vh;}
 }
 @media screen and (min-width:600px) and (max-width:900px) and (orientation:portrait){
   .metrics{grid-template-columns:repeat(4,minmax(0,1fr));}
@@ -354,7 +353,6 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
       <div class="live-badge"><div class="live-dot off" id="liveDot"></div><span id="liveLabel">WAITING</span></div>
       <button class="btn-ghost" onclick="savePDF()" title="Save as PDF">🖨</button>
       <button class="btn-ghost" onclick="showHelp()" style="border-color:rgba(59,130,246,.4);color:#60a5fa;">? Help</button>
-      <button class="btn-ghost" onclick="openStatusPage()" style="border-color:rgba(0,212,170,.4);color:var(--accent);">📡 Status Device</button>
       <button class="btn" onclick="pickFile()">Change file</button>
     </div>
   </header>
@@ -1281,15 +1279,8 @@ function updateMetrics(){
   const unusual=d.filter(r=>r.p>threshold);
   set('s-kwh',(totalWh/1000).toFixed(3));set('s-kwh-sub','kWh ('+totalWh.toFixed(0)+' Wh)');
   set('s-total',totalP);set('s-total-sub',d.length+' buckets');
-  const uniqDays=(arr)=>[...new Set(arr.map(r=>r.date).filter(Boolean))].length||1;
-  let avgVal,avgLabel;
-  if(timeFilterMin===15){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh in last 15 min';}
-  else if(timeFilterMin===120){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh in last 1 hour';}
-  else if(typeof timeFilterMin==='string'&&timeFilterMin.startsWith('day:')){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh today';}
-  else if(timeFilterMin===525600){const wks=Math.max(1,Math.ceil(uniqDays(d)/7));avgVal=(totalWh/1000/wks).toFixed(3);avgLabel='kWh/week avg ('+wks+'wk)';}
-  else{const days=uniqDays(d);avgVal=(totalWh/1000/days).toFixed(3);avgLabel='kWh/day avg ('+days+'d)';}
-  set('s-avg-kwh',avgVal);
-  set('s-avg-kwh-sub',avgLabel+' · '+d.length+' buckets');
+  // ── AVG KWH: bucket-count-aware average per filter context ──
+  _calcAvgKwh(d, d.length);
   set('s-peak-wh',peakWh.toFixed(0));set('s-peak-wh-sub',(peakWh/1000).toFixed(3)+' kWh');
   set('s-offpeak-wh',offWh.toFixed(0));
   set('s-maxpulse',maxPRow.p<0?'—':maxPRow.p);
@@ -1824,15 +1815,13 @@ function updateDeviceStatus(text){
       lbl.textContent='Device Fail — see Status ↗';if(cardDiv)cardDiv.style.cursor='pointer';
     }
   }
-  // Save for Status Device page — detect CCLK from the log
+  // Save for Device Status panel — detect CCLK from the log
   const _cclkRe2=/\+CCLK:\s*"(\d+)\/(\d+)\/(\d+),(\d+):(\d+):(\d+)/;
   let _sdCclkActive=false,_sdCclkDate='',_sdCclkTime='';
   for(const l of lines){
     const m2=_cclkRe2.exec(l);
     if(m2){_sdCclkDate=`20${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')}`;_sdCclkTime=`${m2[4].padStart(2,'0')}:${m2[5].padStart(2,'0')}:${m2[6].padStart(2,'0')}`;_sdCclkActive=parseInt(_sdCclkDate.slice(0,4))>=2020;break;}
   }
-  _sdLastState={modem,sim,txResult,battery,cclk,txOk,txFail,events,cclkActive:_sdCclkActive,cclkDate:_sdCclkDate,cclkTime:_sdCclkTime};
-  if(document.getElementById('statusDeviceModal')?.style.display==='flex') _renderStatusPage();
 }
 
 function updateCharts(){
@@ -2335,23 +2324,82 @@ function applyFilter(){
   });
   if(rev)filtered=[...filtered].reverse();
   page=0;
-  // Recalculate AVG KWH from the filtered set so it matches what's shown
-  _updateAvgKwhFromFiltered(filtered);
+  // Recalculate AVG KWH from the filtered set
+  _calcAvgKwh(filtered, filtered.length);
   renderTable();
 }
 
-function _updateAvgKwhFromFiltered(rows){
+// ── Unified AVG KWH calculator ─────────────────────────────────────────
+// Logic per filter type:
+//  15 min / 1 hour / any minute-based window:
+//    → avg kWh per bucket = totalKwh / buckets  (fine-grained average)
+//  1 day (full or partial):
+//    → total kWh for that day's data; label shows if partial
+//  all / range / week / month / year:
+//    → avg kWh per day across unique days in the set
+function _calcAvgKwh(rows, bucketCount){
   if(!rows||!rows.length){set('s-avg-kwh','—');set('s-avg-kwh-sub','—');return;}
   const totalWh=rows.reduce((s,r)=>s+r.wh,0);
-  const uniqDays=(arr)=>[...new Set(arr.map(r=>r.date).filter(Boolean))].length||1;
-  let avgVal,avgLabel;
-  if(timeFilterMin===15){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh in last 15 min';}
-  else if(timeFilterMin===120){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh in last 1 hour';}
-  else if(typeof timeFilterMin==='string'&&timeFilterMin.startsWith('day:')){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh today';}
-  else if(timeFilterMin===525600){const wks=Math.max(1,Math.ceil(uniqDays(rows)/7));avgVal=(totalWh/1000/wks).toFixed(3);avgLabel='kWh/week avg ('+wks+'wk)';}
-  else{const days=uniqDays(rows);avgVal=(totalWh/1000/days).toFixed(3);avgLabel='kWh/day avg ('+days+'d)';}
-  set('s-avg-kwh',avgVal);
-  set('s-avg-kwh-sub',avgLabel+' · '+rows.length+' rows');
+  const totalKwh=totalWh/1000;
+  const uniqDays=[...new Set(rows.map(r=>r.date).filter(Boolean))];
+  const numDays=uniqDays.length||1;
+  const tf=timeFilterMin;
+
+  let avgVal, avgLabel, subLabel;
+
+  if(tf===15){
+    // Last 15 min: avg per bucket
+    const perBucket=bucketCount>0?totalKwh/bucketCount:0;
+    avgVal=perBucket.toFixed(4);
+    avgLabel='kWh/bucket avg';
+    subLabel='last 15 min · '+bucketCount+' buckets';
+  } else if(tf===60||tf===120){
+    // Last 1 hour: avg per bucket
+    const perBucket=bucketCount>0?totalKwh/bucketCount:0;
+    avgVal=perBucket.toFixed(4);
+    avgLabel='kWh/bucket avg';
+    subLabel='last 1 hour · '+bucketCount+' buckets';
+  } else if(typeof tf==='string'&&tf.startsWith('day:')){
+    // Specific day: total kWh for that day
+    // Check if we have a full day (all 24h buckets present) or partial
+    const dayDate=tf.slice(4);
+    const allDayData=allData.filter(r=>r.date===dayDate);
+    const isFullDay=allDayData.length>=rows.length&&allDayData.length>0;
+    // Compute hours spanned
+    const hours=[...new Set(rows.map(r=>r.rtc?r.rtc.slice(0,2):null).filter(Boolean))].length;
+    const isPartial=hours<24;
+    avgVal=totalKwh.toFixed(3);
+    avgLabel=isPartial?'kWh (partial day)':'kWh today (full day)';
+    subLabel=dayDate+' · '+hours+' hour'+(hours!==1?'s':'')+' · '+bucketCount+' buckets';
+  } else if(tf===10080){
+    // 1 week: avg per day
+    avgVal=(totalKwh/numDays).toFixed(3);
+    avgLabel='kWh/day avg';
+    subLabel='1 week · '+numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+  } else if(tf===43200){
+    // 1 month: avg per day
+    avgVal=(totalKwh/numDays).toFixed(3);
+    avgLabel='kWh/day avg';
+    subLabel='1 month · '+numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+  } else if(tf===525600){
+    // 1 year: avg per week
+    const weeks=Math.max(1,Math.ceil(numDays/7));
+    avgVal=(totalKwh/weeks).toFixed(3);
+    avgLabel='kWh/week avg';
+    subLabel='1 year · '+weeks+' wk'+(weeks!==1?'s':'')+' · '+bucketCount+' buckets';
+  } else if(typeof tf==='string'&&tf.startsWith('range:')){
+    // Date range: avg per day
+    avgVal=(totalKwh/numDays).toFixed(3);
+    avgLabel='kWh/day avg';
+    subLabel=numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+  } else {
+    // All data: avg per day
+    avgVal=(totalKwh/numDays).toFixed(3);
+    avgLabel='kWh/day avg';
+    subLabel=numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+  }
+  set('s-avg-kwh', avgVal);
+  set('s-avg-kwh-sub', avgLabel+' · '+subLabel);
 }
 
 function renderTable(){
@@ -2789,18 +2837,6 @@ window.addEventListener('load',()=>{
   attachZoom(()=>mainChart);
 });
 
-// Close Status Device modal on Escape or backdrop click
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    const m=document.getElementById('statusDeviceModal');
-    if(m&&m.style.display==='flex') m.style.display='none';
-  }
-});
-document.addEventListener('click',e=>{
-  const m=document.getElementById('statusDeviceModal');
-  if(m&&e.target===m) m.style.display='none';
-});
-
 
 let _dspVisible=false, _dspPaused=false;
 function dspToggle(){
@@ -2827,136 +2863,6 @@ updateDeviceStatus=function(text){
   if(!_dspPaused) _dspOrigFn(text);
 };
 
-// ── STATUS DEVICE PAGE ──────────────────────────────────────────────────
-let _sdLastState=null;
-
-function openStatusPage(){
-  document.getElementById('statusDeviceModal').style.display='flex';
-  _renderStatusPage();
-}
-
-let _sdEventsFull=[];
-
-function _renderStatusPage(){
-  const modal=document.getElementById('statusDeviceModal');
-  if(!modal) return;
-  const colOk='#00d4aa',colWarn='#f59e0b',colErr='#ef4444',colMuted='#5a6a7e';
-  const se=(id,txt,col)=>{const e=document.getElementById(id);if(e){e.textContent=txt||'—';e.style.color=col||colMuted;}};
-
-  // RTC source badge
-  const badge=document.getElementById('sdRtcBadge');
-  if(badge){
-    if(_sdLastState?.cclkActive){
-      badge.textContent='✅ CCLK: '+(_sdLastState.cclkDate||'')+'  '+(_sdLastState.cclkTime||'');
-      badge.style.cssText='font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:5px;background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.3);';
-    } else {
-      badge.textContent='⚠️ PC Clock fallback — no CCLK in log';
-      badge.style.cssText='font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:5px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);';
-    }
-  }
-
-  if(_sdLastState){
-    const {modem,sim,txResult,battery,cclk,txOk,txFail}=_sdLastState;
-    se('sd-modem',modem,modem.includes('FAIL')||modem.toLowerCase().includes('fail')?colErr:modem==='—'?colMuted:colOk);
-    se('sd-sim',sim,sim==='READY'?colOk:sim.includes('NOT')?colErr:colMuted);
-    se('sd-tx',txResult,txResult==='OK'?colOk:txResult.includes('FAIL')?colErr:colMuted);
-    se('sd-batt',battery||'—',colOk);
-    const cf=!cclk||cclk==='—'||cclk==='Querying...';
-    se('sd-cclk',cf?'No CCLK':cclk,cf?colWarn:'#60a5fa');
-    se('sd-cycles','OK:'+txOk+' / Fail:'+txFail,txFail>0?colWarn:colOk);
-    _sdEventsFull=_sdLastState.events||[];
-  } else {
-    _sdEventsFull=[];
-  }
-
-  // Populate Bucket Detail tab
-  _renderSdBuckets();
-  // Populate Events tab
-  _filterSdEvents();
-
-  // Show default tab
-  _sdSwitchTab('events');
-}
-
-function _sdSwitchTab(tab){
-  ['events','buckets'].forEach(t=>{
-    const btn=document.getElementById('sdTab-'+t);
-    const pane=document.getElementById('sdPane-'+t);
-    if(btn) btn.style.cssText=t===tab
-      ?'background:rgba(0,212,170,.15);color:var(--accent);border:1px solid rgba(0,212,170,.4);border-radius:6px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;font-weight:700;'
-      :'background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;';
-    if(pane) pane.style.display=t===tab?'block':'none';
-  });
-  // show/hide controls
-  const ec=document.getElementById('sdEventsControls');
-  const bc=document.getElementById('sdBucketCount');
-  if(ec) ec.style.display=tab==='events'?'flex':'none';
-  if(bc) bc.style.display=tab==='buckets'?'inline':'none';
-  // re-render bucket table on switch so it's always fresh
-  if(tab==='buckets') _renderSdBuckets();
-}
-
-function _renderSdBuckets(){
-  const tbody=document.getElementById('sdBucketsTbody');
-  const noEl=document.getElementById('sdNoBuckets');
-  const cntEl=document.getElementById('sdBucketCount');
-  if(!tbody) return;
-  const threshold=calcUnusualThreshold(allData);
-  const data=allData; // all buckets
-  if(cntEl) cntEl.textContent=data.length+' bucket'+(data.length!==1?'s':'');
-  if(!data.length){tbody.innerHTML='';if(noEl)noEl.style.display='block';return;}
-  if(noEl) noEl.style.display='none';
-  const PAGE_B=50;
-  // Use reversed (newest first) for display
-  const rev=[...data].reverse().slice(0,500); // cap at 500 for perf
-  tbody.innerHTML=rev.map((r,i)=>{
-    const unusual=r.p>threshold;
-    const bg=unusual?'background:rgba(239,68,68,.04);':'';
-    const pC=unusual?'background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);':'background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25);';
-    return `<tr style="${bg}border-bottom:1px solid var(--border);">
-      <td style="padding:4px 8px;color:var(--muted);font-size:10px;">${data.length-i}</td>
-      <td style="padding:4px 8px;"><span style="background:rgba(0,212,170,.1);color:#00d4aa;border:1px solid rgba(0,212,170,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.date||'—'}</span></td>
-      <td style="padding:4px 8px;"><span style="background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.rtc||'—'}</span></td>
-      <td style="padding:4px 8px;color:var(--accent);font-size:10px;font-family:var(--mono);">${r.log_ts||'—'}</td>
-      <td style="padding:4px 8px;"><span style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.HI}</span></td>
-      <td style="padding:4px 8px;"><span style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.LO}</span></td>
-      <td style="padding:4px 8px;color:var(--muted);font-size:10px;">${r.hw}</td>
-      <td style="padding:4px 8px;"><span style="border-radius:4px;padding:1px 7px;font-size:10px;font-family:var(--mono);font-weight:600;${pC}">${r.p}</span></td>
-      <td style="padding:4px 8px;color:#a78bfa;font-size:10px;font-family:var(--mono);">${r.wh.toFixed(0)} Wh</td>
-      <td style="padding:4px 8px;"><span style="background:${r.isPeak?'rgba(245,158,11,.15)':'rgba(90,106,126,.12)'};color:${r.isPeak?'#fbbf24':'var(--muted)'};border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.isPeak?'⚡ Peak':'Off'}</span></td>
-      <td style="padding:4px 8px;color:var(--muted);font-size:10px;font-family:var(--mono);">RM ${r.genCost.toFixed(5)}</td>
-      <td style="padding:4px 8px;color:var(--accent);font-size:10px;font-family:var(--mono);">RM ${r.touCost.toFixed(5)}</td>
-      ${unusual?`<td style="padding:4px 8px;"><span style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:4px;padding:1px 6px;font-size:10px;">⚠</span></td>`:'<td style="padding:4px 8px;color:var(--muted);font-size:10px;">—</td>'}
-    </tr>`;
-  }).join('');
-}
-
-function _filterSdEvents(){
-  const q=(document.getElementById('sdSearch')?.value||'').toLowerCase();
-  const tf=document.getElementById('sdTypeFilter')?.value||'all';
-  const rows=_sdEventsFull.filter(e=>{
-    const mT=tf==='all'||e.type===tf;
-    const mQ=!q||(e.ts||'').toLowerCase().includes(q)||(e.msg||'').toLowerCase().includes(q)||(e.type||'').toLowerCase().includes(q);
-    return mT&&mQ;
-  });
-  const tbody=document.getElementById('sdEventsTbody');
-  const noEl=document.getElementById('sdNoEvents');
-  const cntEl=document.getElementById('sdEventCount');
-  if(cntEl) cntEl.textContent=rows.length+' event'+(rows.length!==1?'s':'');
-  if(!rows.length){if(tbody)tbody.innerHTML='';if(noEl)noEl.style.display='block';return;}
-  if(noEl) noEl.style.display='none';
-  const rev=[...rows].reverse();
-  tbody.innerHTML=rev.map((e,i)=>`
-    <tr style="border-bottom:1px solid var(--border);">
-      <td style="padding:5px 10px;color:var(--muted);font-size:10px;">${rows.length-i}</td>
-      <td style="padding:5px 10px;color:var(--accent);font-size:11px;white-space:nowrap;font-family:var(--mono);">${e.ts||'—'}</td>
-      <td style="padding:5px 10px;">
-        <span style="background:${e.col}22;color:${e.col};border-radius:4px;padding:2px 7px;font-size:10px;font-family:var(--mono);font-weight:600;white-space:nowrap;">${e.type}</span>
-      </td>
-      <td style="padding:5px 10px;color:#c4cdd6;font-size:11px;font-family:var(--mono);">${e.msg}</td>
-    </tr>`).join('');
-}
-
 // ── VERSION CONTROL (hold / reverse) ────────────────────────────────────
 let _savedVersion=null;
 function versionControl(cmd){
@@ -2979,122 +2885,6 @@ window.hold=()=>versionControl('hold');
 window.reverse=()=>versionControl('reverse');
 </script>
 
-<!-- ══ STATUS DEVICE MODAL ══════════════════════════════════════════════ -->
-<div id="statusDeviceModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.88);align-items:flex-start;justify-content:center;overflow-y:auto;padding:12px;">
-  <div style="background:var(--surface);border:1px solid rgba(0,212,170,.25);border-radius:12px;width:100%;max-width:1100px;margin:auto;overflow:hidden;box-shadow:0 0 60px rgba(0,212,170,.08);">
-
-    <!-- Header -->
-    <div style="background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:18px;">📡</span>
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);">Status Device</div>
-          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);">Device events &amp; bucket detail · parsed from Tera Term log</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <div id="sdRtcBadge" style="font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:5px;background:rgba(90,106,126,.15);color:var(--muted);border:1px solid var(--border);">— clock</div>
-        <button onclick="document.getElementById('statusDeviceModal').style.display='none'" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:6px;padding:0 12px;height:30px;font-size:12px;font-family:var(--mono);cursor:pointer;display:inline-flex;align-items:center;">✕ Close</button>
-      </div>
-    </div>
-
-    <!-- Summary row -->
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--border);">
-      <div style="padding:10px 14px;border-right:1px solid var(--border);">
-        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Modem</div>
-        <div id="sd-modem" style="font-size:13px;font-family:var(--mono);color:var(--muted);">—</div>
-      </div>
-      <div style="padding:10px 14px;border-right:1px solid var(--border);">
-        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">SIM</div>
-        <div id="sd-sim" style="font-size:13px;font-family:var(--mono);color:var(--muted);">—</div>
-      </div>
-      <div style="padding:10px 14px;border-right:1px solid var(--border);">
-        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Last TX</div>
-        <div id="sd-tx" style="font-size:13px;font-family:var(--mono);color:var(--muted);">—</div>
-      </div>
-      <div style="padding:10px 14px;border-right:1px solid var(--border);">
-        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Battery</div>
-        <div id="sd-batt" style="font-size:13px;font-family:var(--mono);color:var(--muted);">—</div>
-      </div>
-      <div style="padding:10px 14px;border-right:1px solid var(--border);">
-        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Clock Sync</div>
-        <div id="sd-cclk" style="font-size:13px;font-family:var(--mono);color:var(--muted);">—</div>
-      </div>
-      <div style="padding:10px 14px;">
-        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">TX Cycles</div>
-        <div id="sd-cycles" style="font-size:13px;font-family:var(--mono);color:var(--muted);">—</div>
-      </div>
-    </div>
-
-    <!-- Tab bar -->
-    <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <button id="sdTab-events" onclick="_sdSwitchTab('events')"
-        style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;">
-        Events</button>
-      <button id="sdTab-buckets" onclick="_sdSwitchTab('buckets')"
-        style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;">
-        Bucket Detail</button>
-      <!-- Events filter controls (shown only in events tab) -->
-      <div id="sdEventsControls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:8px;">
-        <input id="sdSearch" type="text" placeholder="Search events…" oninput="_filterSdEvents()"
-          style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;font-family:var(--mono);width:180px;height:28px;">
-        <select id="sdTypeFilter" onchange="_filterSdEvents()"
-          style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:0 8px;font-size:11px;font-family:var(--mono);height:28px;">
-          <option value="all">All types</option>
-          <option value="BOOT">BOOT</option><option value="MODEM">MODEM</option>
-          <option value="SIM">SIM</option><option value="NET">NET</option>
-          <option value="TX">TX</option><option value="CLOCK">CLOCK</option>
-          <option value="DATA">DATA</option><option value="ERR">ERR</option>
-          <option value="BUCKET">BUCKET</option>
-        </select>
-        <span id="sdEventCount" style="font-size:11px;color:var(--muted);font-family:var(--mono);">— events</span>
-      </div>
-      <span id="sdBucketCount" style="display:none;font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:8px;">— buckets</span>
-    </div>
-
-    <!-- Events pane -->
-    <div id="sdPane-events" style="display:block;max-height:500px;overflow-y:auto;">
-      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;">
-        <thead style="position:sticky;top:0;background:var(--surface2);z-index:1;">
-          <tr>
-            <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">#</th>
-            <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);white-space:nowrap;">Timestamp</th>
-            <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Type</th>
-            <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Event</th>
-          </tr>
-        </thead>
-        <tbody id="sdEventsTbody"></tbody>
-      </table>
-      <div id="sdNoEvents" style="display:none;padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;">No events found. Load a Tera Term log file first.</div>
-    </div>
-
-    <!-- Bucket Detail pane -->
-    <div id="sdPane-buckets" style="display:none;max-height:500px;overflow-y:auto;overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;min-width:900px;">
-        <thead style="position:sticky;top:0;background:var(--surface2);z-index:1;">
-          <tr>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">#</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Date</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">RTC (MYT)</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Log TS</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">HI</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">LO</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">hw</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Pulse</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Energy</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Period</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Gen (RM)</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">ToU (RM)</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Flag</th>
-          </tr>
-        </thead>
-        <tbody id="sdBucketsTbody"></tbody>
-      </table>
-      <div id="sdNoBuckets" style="display:none;padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;">No bucket data. Load a Tera Term log file first.</div>
-    </div>
-
-  </div>
-</div>
 
 </body>
 </html>
