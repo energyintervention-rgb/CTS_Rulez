@@ -34,16 +34,16 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .logo-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
 .logo-text{font-size:16px;font-weight:600;letter-spacing:-.3px;}
 .logo-sub{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
-.hdr-right{display:flex;align-items:center;gap:8px;}
-.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);background:rgba(0,212,170,.1);color:var(--accent);border:1px solid rgba(0,212,170,.25);padding:4px 10px;border-radius:20px;}
+.hdr-right{display:flex;align-items:center;gap:6px;}
+.live-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);background:rgba(0,212,170,.1);color:var(--accent);border:1px solid rgba(0,212,170,.25);padding:0 10px;height:32px;border-radius:20px;white-space:nowrap;}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:blink 1.4s ease-in-out infinite;}
 .live-dot.off{background:var(--muted);animation:none;}
 @keyframes blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
-.btn{background:var(--accent);color:#000;border:none;border-radius:7px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:opacity .15s;}
+.btn{background:var(--accent);color:#000;border:none;border-radius:7px;padding:0 13px;height:32px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:opacity .15s;display:inline-flex;align-items:center;white-space:nowrap;}
 .btn:hover{opacity:.85;}
-.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:7px;padding:6px 13px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:7px;padding:0 13px;height:32px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .15s;display:inline-flex;align-items:center;white-space:nowrap;}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
-.sel{background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:11px;font-family:var(--mono);cursor:pointer;}
+.sel{background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:0 8px;height:32px;font-size:11px;font-family:var(--mono);cursor:pointer;}
 
 /* status bar */
 .sbar{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;font-family:var(--mono);font-size:11px;flex-wrap:wrap;}
@@ -305,10 +305,10 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
         <div class="logo-sub" id="logoSub">energy-test-001 · 1 pulse = 1 Wh · TNB tariff July 2025</div>
       </div>
     </div>
-    <div class="hdr-right">
-      <div id="dsp-fab" style="font-family:var(--mono);position:relative;">
+    <div class="hdr-right" style="align-items:stretch;">
+      <div id="dsp-fab" style="font-family:var(--mono);position:relative;display:flex;align-items:stretch;">
 
-  <button id="dsp-fab-btn" onclick="dspToggle()" style="background:#1a2535;border:1px solid #2d4060;border-radius:8px;padding:7px 14px;color:#9ca3af;font-size:11px;font-family:var(--mono);cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 2px 12px rgba(0,0,0,.5);">
+  <button id="dsp-fab-btn" onclick="dspToggle()" style="background:#1a2535;border:1px solid #2d4060;border-radius:8px;padding:0 14px;color:#9ca3af;font-size:11px;font-family:var(--mono);cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 2px 12px rgba(0,0,0,.5);height:32px;">
     <span id="dsp-fab-dot" style="width:7px;height:7px;border-radius:50%;background:#00d4aa;display:inline-block;animation:blink 1.4s ease-in-out infinite;"></span>
     <span>Device Status</span>
     <span id="dsp-fab-arrow" style="font-size:10px;">▲</span>
@@ -342,32 +342,18 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
     <div id="dsp-paused-banner" style="display:none;background:rgba(245,158,11,.1);border-top:1px solid rgba(245,158,11,.2);padding:6px 12px;color:#f59e0b;font-size:10px;text-align:center;">⏸ Updates paused — click Resume to restart</div>
   </div>
 </div>
-      <select class="sel" id="intervalSel" onchange="changeInterval()">
+      <select class="sel" id="intervalSel" onchange="changeInterval()" style="height:32px;padding:0 8px;display:flex;align-items:center;">
         <option value="3000">Refresh: 3s</option>
         <option value="5000">Refresh: 5s</option>
         <option value="10000">Refresh: 10s</option>
         <option value="30000">Refresh: 30s</option>
       </select>
-      <button id="stopResumeBtn" class="btn-ghost" onclick="togglePolling()" style="border-color:rgba(239,68,68,.4);color:#f87171;">⏹ Stop</button>
-      <div class="live-badge"><div class="live-dot off" id="liveDot"></div><span id="liveLabel">WAITING</span></div>
-      <button class="btn-ghost" onclick="savePDF()" title="Save as PDF" style="padding:6px 10px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 6 2 18 2 18 9"></polyline>
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-          <rect x="6" y="14" width="12" height="8"></rect>
-        </svg>
-      </button>
-      <button class="btn-ghost" onclick="showHelp()" style="border-color:rgba(59,130,246,.4);color:#60a5fa;">? Help</button>
-      <button class="btn-ghost" onclick="openStatusPage()" style="border-color:rgba(0,212,170,.4);color:var(--accent);">📡 Status Device</button>
-      <!-- Version Control inline command -->
-      <div style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:3px 6px;">
-        <input id="vcInput" type="text" placeholder="hold / reverse" title="Version control: type hold to save, reverse to restore"
-          style="background:transparent;color:var(--text);border:none;outline:none;font-size:11px;font-family:var(--mono);width:100px;"
-          onkeydown="if(event.key==='Enter'){versionControl(this.value);this.value='';}">
-        <button onclick="versionControl(document.getElementById('vcInput').value);document.getElementById('vcInput').value='';"
-          style="background:rgba(0,212,170,.12);color:var(--accent);border:1px solid rgba(0,212,170,.25);border-radius:5px;padding:2px 7px;font-size:10px;font-family:var(--mono);cursor:pointer;">▶</button>
-      </div>
-      <button class="btn" onclick="pickFile()">Change file</button>
+      <button id="stopResumeBtn" class="btn-ghost" onclick="togglePolling()" style="border-color:rgba(239,68,68,.4);color:#f87171;height:32px;padding:0 13px;">⏹ Stop</button>
+      <div class="live-badge" style="height:32px;padding:0 10px;"><div class="live-dot off" id="liveDot"></div><span id="liveLabel">WAITING</span></div>
+      <button class="btn-ghost" onclick="savePDF()" title="Save as PDF" style="height:32px;padding:0 10px;">🖨</button>
+      <button class="btn-ghost" onclick="showHelp()" style="border-color:rgba(59,130,246,.4);color:#60a5fa;height:32px;padding:0 13px;">? Help</button>
+      <button class="btn-ghost" onclick="openStatusPage()" style="border-color:rgba(0,212,170,.4);color:var(--accent);height:32px;padding:0 13px;">📡 Status Device</button>
+      <button class="btn" onclick="pickFile()" style="height:32px;padding:0 13px;">Change file</button>
     </div>
   </header>
 
@@ -763,10 +749,6 @@ let fileHandle=null,allData=[],filtered=[],page=0;
 let intervalId=null,intervalMs=3000;
 let timeFilterMin='all',summaryPeriod='1month';
 let energyChart=null,mainChart=null,hiDistChart=null,kwhStackChart=null;
-// RTC sync state: 'cclk' = from Tera Term CCLK, 'pc' = fallback PC clock
-let _rtcSource='pc'; // updated in parseLog
-// Version control: hold/reverse
-let _savedVersion=null;
 
 // load any existing history on startup
 window.addEventListener('load',()=>{
@@ -1076,10 +1058,7 @@ function parseLog(text){
   // lastLogTs for stale detection (use last TS line)
   let lastLogTs=null;
   for(let i=lines.length-1;i>=0;i--){ const m=tsRe.exec(lines[i]); if(m){lastLogTs=parseLogTs(m[1]);break;} }
-
-  // Update RTC source indicator based on CCLK availability
-  _rtcSource = cclkFound ? 'cclk' : 'pc';
-  updateRtcSourceIndicator();
+  set('dateSource','(PC clock — device RTC diff)');
   console.log('EE-TIME: buckets='+_allBucketLines.length+' devRtc='+_devRtcMap.size+' lastDevRtc='+_lastDevRtcSec);
 
   const res=[];
@@ -1089,17 +1068,11 @@ function parseLog(text){
     const tsm=tsRe.exec(lines[i]);const thisLogTs=tsm?parseLogTs(tsm[1]):null;
     let actualTime='',rtcHour=-1,isWeekday=true,bucketDate=`${nowD.getFullYear()}-${String(nowD.getMonth()+1).padStart(2,'0')}-${String(nowD.getDate()).padStart(2,'0')}`;
 
-    // RTC = CCLK date (if available) + device RTC time offset, else PC clock fallback
+    // RTC = nowMs - secondsAgo where secondsAgo comes from _bucketCum
+    // _bucketCum: latest bucket=0, each earlier bucket = cumulative diff from TS
     {
       const secondsAgo = _bucketCum.has(i) ? _bucketCum.get(i) : 0;
-      let d;
-      if(cclkFound && cclkDate && cclkTime){
-        // Anchor: last bucket time = cclkDate + cclkTime; walk backward
-        const cclkMs = new Date(cclkDate+'T'+cclkTime).getTime();
-        d = new Date(cclkMs - secondsAgo*1000);
-      } else {
-        d = new Date(nowMs - secondsAgo*1000);
-      }
+      const d = new Date(nowMs - secondsAgo*1000);
       const h=d.getHours(), m2=d.getMinutes(), s=d.getSeconds();
       actualTime=`${String(h).padStart(2,'0')}:${String(m2).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
       rtcHour=h; isWeekday=d.getDay()>=1&&d.getDay()<=5;
@@ -1275,20 +1248,6 @@ function getSummaryData(period){
   };
 }
 
-function updateRtcSourceIndicator(){
-  const el=document.getElementById('dateSource');
-  if(!el) return;
-  if(_rtcSource==='cclk'){
-    el.textContent='✅ CCLK (Tera Term)';
-    el.style.color='var(--success)';
-    el.title='Date/time anchored to device CCLK from Tera Term log';
-  } else {
-    el.textContent='⚠️ PC Clock fallback';
-    el.style.color='var(--warn)';
-    el.title='CCLK not found in log — using PC clock as time reference';
-  }
-}
-
 function updateMetrics(){
   const d=getViewData();if(!d.length)return;
   const threshold=calcUnusualThreshold(d);
@@ -1366,21 +1325,6 @@ function updateMetrics(){
   const dates=[...new Set(d.map(r=>r.date).filter(Boolean))];
   const dSel=document.getElementById('dateFilter');const curD=dSel.value;
   dSel.innerHTML='<option value="all">All dates</option>'+dates.map(v=>`<option value="${v}"${curD==v?' selected':''}>${v}</option>`).join('');
-}
-
-// Update only the AVG KWH metric card to reflect the current filtered rows
-function updateAvgKwhMetric(rows){
-  if(!rows||!rows.length) return;
-  const totalWh=rows.reduce((s,r)=>s+r.wh,0);
-  const uniqDays=(arr)=>[...new Set(arr.map(r=>r.date).filter(Boolean))].length||1;
-  let avgVal,avgLabel;
-  if(timeFilterMin===15){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh in last 15 min';}
-  else if(timeFilterMin===120){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh in last 1 hour';}
-  else if(typeof timeFilterMin==='string'&&timeFilterMin.startsWith('day:')){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh today';}
-  else if(timeFilterMin===525600){const wks=Math.max(1,Math.ceil(uniqDays(rows)/7));avgVal=(totalWh/1000/wks).toFixed(3);avgLabel='kWh/week avg ('+wks+'wk)';}
-  else{const days=uniqDays(rows);avgVal=(totalWh/1000/days).toFixed(3);avgLabel='kWh/day avg ('+days+'d)';}
-  set('s-avg-kwh',avgVal);
-  set('s-avg-kwh-sub',avgLabel+' · '+rows.length+' rows');
 }
 
 // ── TNB TARIFF DATABASE (Jul 2025, Peninsular Malaysia) ────────────────
@@ -1858,118 +1802,7 @@ function updateDeviceStatus(text){
       lbl.textContent='Device Fail — see Status ↗';if(cardDiv)cardDiv.style.cursor='pointer';
     }
   }
-
-  // Store parsed state for Status Device page
-  _lastDeviceState={modem,sim,txResult,battery,cclk,txOk,txFail,events};
-  // Live-update Status page if it's currently open
-  if(document.getElementById('statusDeviceModal').style.display!=='none'){
-    _renderStatusPage();
-  }
 }
-
-// ── STATUS DEVICE PAGE ───────────────────────────────────────────────────
-let _lastDeviceState=null;
-let _sdAllEvents=[];
-
-function openStatusPage(){
-  document.getElementById('statusDeviceModal').style.display='flex';
-  _renderStatusPage();
-}
-
-function _renderStatusPage(){
-  if(!_lastDeviceState) return;
-  const {modem,sim,txResult,battery,cclk,txOk,txFail,events}=_lastDeviceState;
-  const colOk='#00d4aa',colWarn='#f59e0b',colErr='#ef4444',colMuted='#5a6a7e';
-  const setEl=(id,txt,col)=>{const e=document.getElementById(id);if(e){e.textContent=txt;e.style.color=col||colMuted;}};
-  setEl('sd-modem',modem,modem.includes('FAIL')||modem.toLowerCase().includes('fail')?colErr:modem==='—'?colMuted:colOk);
-  setEl('sd-sim',sim,sim==='READY'?colOk:sim.includes('NOT')?colErr:colMuted);
-  setEl('sd-tx',txResult,txResult==='OK'?colOk:txResult.includes('FAIL')?colErr:colMuted);
-  setEl('sd-batt',battery||'—',colOk);
-  const cclkFailed=!cclk||cclk==='—'||cclk==='Querying...';
-  setEl('sd-cclk',cclkFailed?'No CCLK':cclk,cclkFailed?colWarn:'#60a5fa');
-  setEl('sd-cycles','OK:'+txOk+' / Fail:'+txFail,txFail>0?colWarn:colOk);
-
-  // RTC source badge
-  const badge=document.getElementById('sdRtcBadge');
-  if(badge){
-    if(_rtcSource==='cclk'){
-      badge.textContent='✅ CCLK (Tera Term)';
-      badge.style.background='rgba(16,185,129,.1)';
-      badge.style.color='var(--success)';
-      badge.style.borderColor='rgba(16,185,129,.25)';
-    } else {
-      badge.textContent='⚠️ PC Clock fallback';
-      badge.style.background='rgba(245,158,11,.1)';
-      badge.style.color='var(--warn)';
-      badge.style.borderColor='rgba(245,158,11,.25)';
-    }
-  }
-
-  _sdAllEvents=events||[];
-  filterStatusEvents();
-}
-
-function filterStatusEvents(){
-  const q=(document.getElementById('sdSearch')?.value||'').toLowerCase();
-  const tf=document.getElementById('sdTypeFilter')?.value||'all';
-  const rows=_sdAllEvents.filter(e=>{
-    const mT=tf==='all'||e.type===tf;
-    const mQ=!q||(e.ts||'').toLowerCase().includes(q)||(e.msg||'').toLowerCase().includes(q)||(e.type||'').toLowerCase().includes(q);
-    return mT&&mQ;
-  });
-  const tbody=document.getElementById('sdEventsTbody');
-  const noEl=document.getElementById('sdNoEvents');
-  const cntEl=document.getElementById('sdEventCount');
-  if(cntEl) cntEl.textContent=rows.length+' event'+(rows.length!==1?'s':'');
-  if(!rows.length){
-    if(tbody) tbody.innerHTML='';
-    if(noEl) noEl.style.display='block';
-    return;
-  }
-  if(noEl) noEl.style.display='none';
-  // show newest first
-  const rev=[...rows].reverse();
-  tbody.innerHTML=rev.map((e,i)=>`
-    <tr style="border-bottom:1px solid var(--border);">
-      <td style="padding:5px 10px;color:var(--muted);font-size:10px;">${rows.length-i}</td>
-      <td style="padding:5px 10px;color:var(--accent);font-size:11px;white-space:nowrap;">${e.ts||'—'}</td>
-      <td style="padding:5px 10px;">
-        <span style="background:${e.col}22;color:${e.col};border-radius:4px;padding:2px 7px;font-size:10px;font-family:var(--mono);font-weight:600;white-space:nowrap;">${e.type}</span>
-      </td>
-      <td style="padding:5px 10px;color:#c4cdd6;font-size:11px;">${e.msg}</td>
-    </tr>`).join('');
-}
-
-// ── VERSION CONTROL ───────────────────────────────────────────────────────
-// Usage: type "hold" or "reverse" in the browser console, or via the command input.
-// hold   → saves current index.html source as _savedVersion
-// reverse → restores _savedVersion and downloads it
-
-function versionControl(cmd){
-  const c=(cmd||'').trim().toLowerCase();
-  if(c==='hold'){
-    _savedVersion=document.documentElement.outerHTML;
-    const ts=new Date().toLocaleTimeString();
-    alert('✅ Version saved at '+ts+'\nUse versionControl("reverse") to restore.');
-    console.log('%c[VC] Version held at '+ts,'color:#00d4aa;font-weight:bold;');
-  } else if(c==='reverse'){
-    if(!_savedVersion){alert('⚠️ No saved version found. Run versionControl("hold") first.');return;}
-    // Download the saved version as index.html
-    const blob=new Blob([_savedVersion],{type:'text/html'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='index.html';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    console.log('%c[VC] Reversed — saved version downloaded as index.html','color:#f59e0b;font-weight:bold;');
-    alert('⬇️ Saved version restored and downloaded as index.html.\nReplace the current file with this download to revert.');
-  } else {
-    console.warn('[VC] Unknown command: '+cmd+'. Use "hold" or "reverse".');
-  }
-}
-// Expose to window for console access
-window.hold=()=>versionControl('hold');
-window.reverse=()=>versionControl('reverse');
 
 function updateCharts(){
   const d=getViewData();if(!d.length)return;
@@ -2471,9 +2304,23 @@ function applyFilter(){
   });
   if(rev)filtered=[...filtered].reverse();
   page=0;
-  // Update AVG KWH metric to reflect the active filter
-  updateAvgKwhMetric(filtered);
+  // Recalculate AVG KWH from the filtered set so it matches what's shown
+  _updateAvgKwhFromFiltered(filtered);
   renderTable();
+}
+
+function _updateAvgKwhFromFiltered(rows){
+  if(!rows||!rows.length){set('s-avg-kwh','—');set('s-avg-kwh-sub','—');return;}
+  const totalWh=rows.reduce((s,r)=>s+r.wh,0);
+  const uniqDays=(arr)=>[...new Set(arr.map(r=>r.date).filter(Boolean))].length||1;
+  let avgVal,avgLabel;
+  if(timeFilterMin===15){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh in last 15 min';}
+  else if(timeFilterMin===120){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh in last 1 hour';}
+  else if(typeof timeFilterMin==='string'&&timeFilterMin.startsWith('day:')){avgVal=(totalWh/1000).toFixed(3);avgLabel='kWh today';}
+  else if(timeFilterMin===525600){const wks=Math.max(1,Math.ceil(uniqDays(rows)/7));avgVal=(totalWh/1000/wks).toFixed(3);avgLabel='kWh/week avg ('+wks+'wk)';}
+  else{const days=uniqDays(rows);avgVal=(totalWh/1000/days).toFixed(3);avgLabel='kWh/day avg ('+days+'d)';}
+  set('s-avg-kwh',avgVal);
+  set('s-avg-kwh-sub',avgLabel+' · '+rows.length+' rows');
 }
 
 function renderTable(){
@@ -2934,28 +2781,245 @@ function dspPause(){
 // Wrap updateDeviceStatus to skip when paused
 const _dspOrig=updateDeviceStatus;
 updateDeviceStatus=function(text){ if(!_dspPaused) _dspOrig(text); };
+
+// ── STATUS DEVICE PAGE ──────────────────────────────────────────────────
+let _sdLastState=null; // {modem,sim,txResult,battery,cclk,txOk,txFail,events,cclkFound,cclkDate,cclkTime}
+
+// Patch updateDeviceStatus to also save state for Status page
+const _dspOrig2=updateDeviceStatus;
+updateDeviceStatus=function(text){
+  // still call the existing wrapped version (handles pause)
+  _dspOrig2(text);
+  // extract events+state again for Status page (lightweight re-parse)
+  try{ _buildSdState(text); }catch(e){}
+};
+
+function _buildSdState(text){
+  // Re-uses the same parse logic from updateDeviceStatus but saves the result
+  const lines=text.split('\n');
+  const rtcRe2=/RTC Time!\s*(\d+):(\d+):(\d+)/;
+  const tsRe2=/\[(\d{2}:\d{2}:\d{2})\]/;
+  const cclkRe2=/\+CCLK:\s*"(\d+)\/(\d+)\/(\d+),(\d+):(\d+):(\d+)/;
+  // Get CCLK
+  let cclkFound=false,cclkDate='',cclkTime2='';
+  for(const l of lines){
+    const m=cclkRe2.exec(l);
+    if(m){cclkDate=`20${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;cclkTime2=`${m[4].padStart(2,'0')}:${m[5].padStart(2,'0')}:${m[6].padStart(2,'0')}`;cclkFound=true;break;}
+  }
+  // Build lineRtc map
+  const lineRtc={};
+  for(let i=0;i<lines.length;i++){
+    const m=rtcRe2.exec(lines[i]);
+    if(m) lineRtc[i]=`${m[1]}:${String(m[2]).padStart(2,'0')}:${String(m[3]).padStart(2,'0')}`;
+  }
+  const getTime=idx=>{
+    if(lineRtc[idx]) return lineRtc[idx];
+    const m=tsRe2.exec(lines[idx]||'');
+    return m?m[1]:'—';
+  };
+  let modem='—',sim='—',txResult='—',battery='—',cclk='—';
+  let txOk=0,txFail=0;
+  const events=[];
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i];const ts=getTime(i);
+    if(l.includes('Cold boot path')){modem='Cold boot';events.push({ts,type:'BOOT',msg:'Cold boot — modem powering up',col:'#f59e0b'});}
+    if(l.includes('PWRKEY PRESS')){modem='PWRKEY pressed';}
+    if(l.includes('Running autobaud')){modem='Baud lock...';events.push({ts,type:'MODEM',msg:'Autobaud/baud-lock running',col:'#5a6a7e'});}
+    if(l.includes('Autobaud/baud-lock failed')){modem='Baud lock FAIL';events.push({ts,type:'ERR',msg:'Autobaud failed — skip publish',col:'#ef4444'});}
+    if(l.match(/^[^[]*RDY\s*$/)){modem='RDY';events.push({ts,type:'MODEM',msg:'Modem RDY',col:'#00d4aa'});}
+    if(l.includes('+CFUN: 1')){modem='CFUN:1 (full)';}
+    if(l.includes('+CPIN: READY')){sim='READY';events.push({ts,type:'SIM',msg:'SIM: CPIN READY',col:'#00d4aa'});}
+    if(l.includes('+CPIN: NOT READY')||l.includes('+CPIN: NO SIM')){sim='NOT READY';events.push({ts,type:'SIM',msg:'SIM: NOT READY',col:'#ef4444'});}
+    if(l.includes('SMS Ready')){modem='SMS Ready';}
+    if(l.includes('+CREG: 1')||l.includes('+CREG: 5')){modem='Registered';events.push({ts,type:'NET',msg:'Network registered',col:'#00d4aa'});}
+    if(l.includes('+CGATT: 1')){modem='GPRS attached';events.push({ts,type:'NET',msg:'GPRS attached',col:'#00d4aa'});}
+    if(l.includes('[TX] result = OK')||l.includes('result = OK')){txResult='OK';txOk++;events.push({ts,type:'TX',msg:'Data published OK',col:'#00d4aa'});}
+    if(l.includes('[TX] result = FAIL')||l.includes('result = FAIL')){txResult='FAIL';txFail++;events.push({ts,type:'TX',msg:'Publish FAILED — skip cycle',col:'#ef4444'});}
+    if(l.includes('Cellular engine failed')){txResult='ENGINE FAIL';events.push({ts,type:'ERR',msg:'Cellular engine failed',col:'#ef4444'});}
+    const battM=l.match(/Battery\s*:\s*([\d.]+)/);
+    if(battM){battery=parseFloat(battM[1]).toFixed(2)+'V';}
+    if(l.includes('[TIME][CCLK]')){cclk='Querying...';}
+    if(l.includes('+CCLK:')){const cm=l.match(/\+CCLK: "(.+)"/);cclk=cm?cm[1].slice(0,14):'Synced';events.push({ts,type:'CLOCK',msg:'Clock synced: '+cclk,col:'#60a5fa'});}
+    if(l.includes('[PAYLOAD] V2')){events.push({ts,type:'DATA',msg:'Payload sent to server',col:'#a78bfa'});}
+    const bucketM=l.match(/\[BUCKET\] idx=(\d+)/);
+    if(bucketM&&parseInt(bucketM[1])%50===0){events.push({ts,type:'BUCKET',msg:'Bucket #'+bucketM[1],col:'#5a6a7e'});}
+  }
+  const cclkActive=cclkFound&&cclkDate;
+  _sdLastState={modem,sim,txResult,battery,cclk,txOk,txFail,events,cclkActive,cclkDate,cclkTime:cclkTime2};
+  // live-refresh Status page if open
+  if(document.getElementById('statusDeviceModal')?.style.display==='flex') _renderStatusPage();
+}
+
+function openStatusPage(){
+  document.getElementById('statusDeviceModal').style.display='flex';
+  _renderStatusPage();
+}
+
+let _sdEventsFull=[];
+
+function _renderStatusPage(){
+  const modal=document.getElementById('statusDeviceModal');
+  if(!modal) return;
+  const colOk='#00d4aa',colWarn='#f59e0b',colErr='#ef4444',colMuted='#5a6a7e';
+  const se=(id,txt,col)=>{const e=document.getElementById(id);if(e){e.textContent=txt||'—';e.style.color=col||colMuted;}};
+
+  // RTC source badge
+  const badge=document.getElementById('sdRtcBadge');
+  if(badge){
+    if(_sdLastState?.cclkActive){
+      badge.textContent='✅ CCLK: '+(_sdLastState.cclkDate||'')+'  '+(_sdLastState.cclkTime||'');
+      badge.style.cssText='font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:5px;background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.3);';
+    } else {
+      badge.textContent='⚠️ PC Clock fallback — no CCLK in log';
+      badge.style.cssText='font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:5px;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);';
+    }
+  }
+
+  if(_sdLastState){
+    const {modem,sim,txResult,battery,cclk,txOk,txFail}=_sdLastState;
+    se('sd-modem',modem,modem.includes('FAIL')||modem.toLowerCase().includes('fail')?colErr:modem==='—'?colMuted:colOk);
+    se('sd-sim',sim,sim==='READY'?colOk:sim.includes('NOT')?colErr:colMuted);
+    se('sd-tx',txResult,txResult==='OK'?colOk:txResult.includes('FAIL')?colErr:colMuted);
+    se('sd-batt',battery||'—',colOk);
+    const cf=!cclk||cclk==='—'||cclk==='Querying...';
+    se('sd-cclk',cf?'No CCLK':cclk,cf?colWarn:'#60a5fa');
+    se('sd-cycles','OK:'+txOk+' / Fail:'+txFail,txFail>0?colWarn:colOk);
+    _sdEventsFull=_sdLastState.events||[];
+  } else {
+    _sdEventsFull=[];
+  }
+
+  // Populate Bucket Detail tab
+  _renderSdBuckets();
+  // Populate Events tab
+  _filterSdEvents();
+
+  // Show default tab
+  _sdSwitchTab('events');
+}
+
+function _sdSwitchTab(tab){
+  ['events','buckets'].forEach(t=>{
+    const btn=document.getElementById('sdTab-'+t);
+    const pane=document.getElementById('sdPane-'+t);
+    if(btn) btn.style.cssText=t===tab
+      ?'background:rgba(0,212,170,.15);color:var(--accent);border:1px solid rgba(0,212,170,.4);border-radius:6px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;font-weight:700;'
+      :'background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;';
+    if(pane) pane.style.display=t===tab?'block':'none';
+  });
+  // show/hide controls
+  const ec=document.getElementById('sdEventsControls');
+  const bc=document.getElementById('sdBucketCount');
+  if(ec) ec.style.display=tab==='events'?'flex':'none';
+  if(bc) bc.style.display=tab==='buckets'?'inline':'none';
+  // re-render bucket table on switch so it's always fresh
+  if(tab==='buckets') _renderSdBuckets();
+}
+
+function _renderSdBuckets(){
+  const tbody=document.getElementById('sdBucketsTbody');
+  const noEl=document.getElementById('sdNoBuckets');
+  const cntEl=document.getElementById('sdBucketCount');
+  if(!tbody) return;
+  const threshold=calcUnusualThreshold(allData);
+  const data=allData; // all buckets
+  if(cntEl) cntEl.textContent=data.length+' bucket'+(data.length!==1?'s':'');
+  if(!data.length){tbody.innerHTML='';if(noEl)noEl.style.display='block';return;}
+  if(noEl) noEl.style.display='none';
+  const PAGE_B=50;
+  // Use reversed (newest first) for display
+  const rev=[...data].reverse().slice(0,500); // cap at 500 for perf
+  tbody.innerHTML=rev.map((r,i)=>{
+    const unusual=r.p>threshold;
+    const bg=unusual?'background:rgba(239,68,68,.04);':'';
+    const pC=unusual?'background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);':'background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25);';
+    return `<tr style="${bg}border-bottom:1px solid var(--border);">
+      <td style="padding:4px 8px;color:var(--muted);font-size:10px;">${data.length-i}</td>
+      <td style="padding:4px 8px;"><span style="background:rgba(0,212,170,.1);color:#00d4aa;border:1px solid rgba(0,212,170,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.date||'—'}</span></td>
+      <td style="padding:4px 8px;"><span style="background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.rtc||'—'}</span></td>
+      <td style="padding:4px 8px;color:var(--accent);font-size:10px;font-family:var(--mono);">${r.log_ts||'—'}</td>
+      <td style="padding:4px 8px;"><span style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.HI}</span></td>
+      <td style="padding:4px 8px;"><span style="background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.LO}</span></td>
+      <td style="padding:4px 8px;color:var(--muted);font-size:10px;">${r.hw}</td>
+      <td style="padding:4px 8px;"><span style="border-radius:4px;padding:1px 7px;font-size:10px;font-family:var(--mono);font-weight:600;${pC}">${r.p}</span></td>
+      <td style="padding:4px 8px;color:#a78bfa;font-size:10px;font-family:var(--mono);">${r.wh.toFixed(0)} Wh</td>
+      <td style="padding:4px 8px;"><span style="background:${r.isPeak?'rgba(245,158,11,.15)':'rgba(90,106,126,.12)'};color:${r.isPeak?'#fbbf24':'var(--muted)'};border-radius:4px;padding:1px 6px;font-size:10px;font-family:var(--mono);">${r.isPeak?'⚡ Peak':'Off'}</span></td>
+      <td style="padding:4px 8px;color:var(--muted);font-size:10px;font-family:var(--mono);">RM ${r.genCost.toFixed(5)}</td>
+      <td style="padding:4px 8px;color:var(--accent);font-size:10px;font-family:var(--mono);">RM ${r.touCost.toFixed(5)}</td>
+      ${unusual?`<td style="padding:4px 8px;"><span style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:4px;padding:1px 6px;font-size:10px;">⚠</span></td>`:'<td style="padding:4px 8px;color:var(--muted);font-size:10px;">—</td>'}
+    </tr>`;
+  }).join('');
+}
+
+function _filterSdEvents(){
+  const q=(document.getElementById('sdSearch')?.value||'').toLowerCase();
+  const tf=document.getElementById('sdTypeFilter')?.value||'all';
+  const rows=_sdEventsFull.filter(e=>{
+    const mT=tf==='all'||e.type===tf;
+    const mQ=!q||(e.ts||'').toLowerCase().includes(q)||(e.msg||'').toLowerCase().includes(q)||(e.type||'').toLowerCase().includes(q);
+    return mT&&mQ;
+  });
+  const tbody=document.getElementById('sdEventsTbody');
+  const noEl=document.getElementById('sdNoEvents');
+  const cntEl=document.getElementById('sdEventCount');
+  if(cntEl) cntEl.textContent=rows.length+' event'+(rows.length!==1?'s':'');
+  if(!rows.length){if(tbody)tbody.innerHTML='';if(noEl)noEl.style.display='block';return;}
+  if(noEl) noEl.style.display='none';
+  const rev=[...rows].reverse();
+  tbody.innerHTML=rev.map((e,i)=>`
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:5px 10px;color:var(--muted);font-size:10px;">${rows.length-i}</td>
+      <td style="padding:5px 10px;color:var(--accent);font-size:11px;white-space:nowrap;font-family:var(--mono);">${e.ts||'—'}</td>
+      <td style="padding:5px 10px;">
+        <span style="background:${e.col}22;color:${e.col};border-radius:4px;padding:2px 7px;font-size:10px;font-family:var(--mono);font-weight:600;white-space:nowrap;">${e.type}</span>
+      </td>
+      <td style="padding:5px 10px;color:#c4cdd6;font-size:11px;font-family:var(--mono);">${e.msg}</td>
+    </tr>`).join('');
+}
+
+// ── VERSION CONTROL (hold / reverse) ────────────────────────────────────
+let _savedVersion=null;
+function versionControl(cmd){
+  const c=(cmd||'').trim().toLowerCase();
+  if(c==='hold'){
+    _savedVersion=document.documentElement.outerHTML;
+    const ts=new Date().toLocaleTimeString();
+    alert('✅ Version saved at '+ts+'\nType "reverse" to restore.');
+    console.log('%c[VC] Version held at '+ts,'color:#00d4aa;font-weight:bold;');
+  } else if(c==='reverse'){
+    if(!_savedVersion){alert('⚠️ No saved version found. Run hold first.');return;}
+    const blob=new Blob([_savedVersion],{type:'text/html'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='index.html';a.click();URL.revokeObjectURL(a.href);
+    alert('⬇️ Saved version downloaded as index.html.\nReplace the current file to revert.');
+  } else {
+    console.warn('[VC] Unknown command: '+cmd+'. Use hold or reverse.');
+  }
+}
+window.hold=()=>versionControl('hold');
+window.reverse=()=>versionControl('reverse');
 </script>
 
-<!-- STATUS DEVICE PAGE MODAL -->
-<div id="statusDeviceModal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.85);align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px 12px;">
-  <div style="background:var(--surface);border:1px solid rgba(0,212,170,.3);border-radius:12px;padding:0;max-width:900px;width:100%;margin:auto;box-shadow:0 0 40px rgba(0,212,170,.1);overflow:hidden;">
-    <!-- modal header -->
-    <div style="background:var(--surface2);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+<!-- ══ STATUS DEVICE MODAL ══════════════════════════════════════════════ -->
+<div id="statusDeviceModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.88);align-items:flex-start;justify-content:center;overflow-y:auto;padding:12px;">
+  <div style="background:var(--surface);border:1px solid rgba(0,212,170,.25);border-radius:12px;width:100%;max-width:1100px;margin:auto;overflow:hidden;box-shadow:0 0 60px rgba(0,212,170,.08);">
+
+    <!-- Header -->
+    <div style="background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:16px;">📡</span>
+        <span style="font-size:18px;">📡</span>
         <div>
           <div style="font-size:14px;font-weight:600;color:var(--text);">Status Device</div>
-          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);">Device event log · parsed from Tera Term log</div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);">Device events &amp; bucket detail · parsed from Tera Term log</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <!-- RTC source badge -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <div id="sdRtcBadge" style="font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:5px;background:rgba(90,106,126,.15);color:var(--muted);border:1px solid var(--border);">— clock</div>
-        <button onclick="document.getElementById('statusDeviceModal').style.display='none'" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:6px;padding:4px 12px;font-size:12px;font-family:var(--mono);cursor:pointer;">✕ Close</button>
+        <button onclick="document.getElementById('statusDeviceModal').style.display='none'" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:6px;padding:0 12px;height:30px;font-size:12px;font-family:var(--mono);cursor:pointer;display:inline-flex;align-items:center;">✕ Close</button>
       </div>
     </div>
-    <!-- summary row -->
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-bottom:1px solid var(--border);">
+
+    <!-- Summary row -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--border);">
       <div style="padding:10px 14px;border-right:1px solid var(--border);">
         <div style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Modem</div>
         <div id="sd-modem" style="font-size:13px;font-family:var(--mono);color:var(--muted);">—</div>
@@ -2981,40 +3045,74 @@ updateDeviceStatus=function(text){ if(!_dspPaused) _dspOrig(text); };
         <div id="sd-cycles" style="font-size:13px;font-family:var(--mono);color:var(--muted);">—</div>
       </div>
     </div>
-    <!-- search / filter bar -->
-    <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <input id="sdSearch" type="text" placeholder="Search events…" oninput="filterStatusEvents()"
-        style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;font-family:var(--mono);width:200px;">
-      <select id="sdTypeFilter" onchange="filterStatusEvents()"
-        style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:5px 9px;font-size:11px;font-family:var(--mono);">
-        <option value="all">All types</option>
-        <option value="BOOT">BOOT</option>
-        <option value="MODEM">MODEM</option>
-        <option value="SIM">SIM</option>
-        <option value="NET">NET</option>
-        <option value="TX">TX</option>
-        <option value="CLOCK">CLOCK</option>
-        <option value="DATA">DATA</option>
-        <option value="ERR">ERR</option>
-        <option value="BUCKET">BUCKET</option>
-      </select>
-      <span id="sdEventCount" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:auto;">— events</span>
+
+    <!-- Tab bar -->
+    <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <button id="sdTab-events" onclick="_sdSwitchTab('events')"
+        style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;">
+        Events</button>
+      <button id="sdTab-buckets" onclick="_sdSwitchTab('buckets')"
+        style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:4px 14px;font-size:11px;font-family:var(--mono);cursor:pointer;">
+        Bucket Detail</button>
+      <!-- Events filter controls (shown only in events tab) -->
+      <div id="sdEventsControls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:8px;">
+        <input id="sdSearch" type="text" placeholder="Search events…" oninput="_filterSdEvents()"
+          style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;font-family:var(--mono);width:180px;height:28px;">
+        <select id="sdTypeFilter" onchange="_filterSdEvents()"
+          style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:0 8px;font-size:11px;font-family:var(--mono);height:28px;">
+          <option value="all">All types</option>
+          <option value="BOOT">BOOT</option><option value="MODEM">MODEM</option>
+          <option value="SIM">SIM</option><option value="NET">NET</option>
+          <option value="TX">TX</option><option value="CLOCK">CLOCK</option>
+          <option value="DATA">DATA</option><option value="ERR">ERR</option>
+          <option value="BUCKET">BUCKET</option>
+        </select>
+        <span id="sdEventCount" style="font-size:11px;color:var(--muted);font-family:var(--mono);">— events</span>
+      </div>
+      <span id="sdBucketCount" style="display:none;font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:8px;">— buckets</span>
     </div>
-    <!-- events table -->
-    <div style="max-height:460px;overflow-y:auto;">
+
+    <!-- Events pane -->
+    <div id="sdPane-events" style="display:block;max-height:500px;overflow-y:auto;">
       <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;">
         <thead style="position:sticky;top:0;background:var(--surface2);z-index:1;">
           <tr>
-            <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);white-space:nowrap;">#</th>
+            <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">#</th>
             <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);white-space:nowrap;">Timestamp</th>
-            <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);white-space:nowrap;">Type</th>
+            <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Type</th>
             <th style="text-align:left;padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Event</th>
           </tr>
         </thead>
         <tbody id="sdEventsTbody"></tbody>
       </table>
-      <div id="sdNoEvents" style="display:none;padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;">No events found. Load a Tera Term log file first.</div>
+      <div id="sdNoEvents" style="display:none;padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;">No events found. Load a Tera Term log file first.</div>
     </div>
+
+    <!-- Bucket Detail pane -->
+    <div id="sdPane-buckets" style="display:none;max-height:500px;overflow-y:auto;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;min-width:900px;">
+        <thead style="position:sticky;top:0;background:var(--surface2);z-index:1;">
+          <tr>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">#</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Date</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">RTC (MYT)</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Log TS</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">HI</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">LO</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">hw</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Pulse</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Energy</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Period</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Gen (RM)</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">ToU (RM)</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border2);">Flag</th>
+          </tr>
+        </thead>
+        <tbody id="sdBucketsTbody"></tbody>
+      </table>
+      <div id="sdNoBuckets" style="display:none;padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;">No bucket data. Load a Tera Term log file first.</div>
+    </div>
+
   </div>
 </div>
 
