@@ -2329,74 +2329,53 @@ function applyFilter(){
   renderTable();
 }
 
-// ── AVG KWH calculator ────────────────────────────────────────────────
-// Short filters (15 min, 1 hour, 1 day):
-//   → total kWh of the latest buckets collected in that window
-//     (real-time consumption for that interval, not divided further)
-// Long ranges (week, month, year, range, all):
-//   → normalised: week/month/range = totalKwh ÷ unique days (kWh/day avg)
-//                 year              = totalKwh ÷ weeks      (kWh/week avg)
+// ── AVG KWH — exact rules ─────────────────────────────────────────────
+// 15 min  → totalKWh of latest buckets  → "kWh (15 min) · N buckets"
+// 1 hour  → totalKWh of latest buckets  → "kWh (1 hour) · N buckets"
+// 1 day   → totalKWh of latest buckets  → "kWh (1 day) · N buckets"
+// 1 week  → totalKWh ÷ unique days      → "kWh/day avg · N days"
+// 1 month → totalKWh ÷ unique days      → "kWh/day avg · N days"
+// 1 year  → totalKWh ÷ weeks            → "kWh/week avg · N weeks"
+// Range   → totalKWh ÷ unique days      → "kWh/day avg · N days"
+// All     → totalKWh ÷ unique days      → "kWh/day avg · N days"
 function _calcAvgKwh(rows, bucketCount){
   if(!rows||!rows.length){set('s-avg-kwh','—');set('s-avg-kwh-sub','—');return;}
-  const totalWh=rows.reduce((s,r)=>s+r.wh,0);
-  const totalKwh=totalWh/1000;
-  const uniqDays=[...new Set(rows.map(r=>r.date).filter(Boolean))];
-  const numDays=uniqDays.length||1;
+  const totalKwh=rows.reduce((s,r)=>s+r.wh,0)/1000;
+  const numDays=[...new Set(rows.map(r=>r.date).filter(Boolean))].length||1;
   const tf=timeFilterMin;
 
   let val, label, sub;
 
   if(tf===15){
-    // Last 15 min — total kWh of latest buckets in window
     val=totalKwh.toFixed(4);
     label='kWh (15 min)';
-    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'')+' · latest interval';
-
+    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'');
   } else if(tf===60||tf===120){
-    // Last 1 hour — total kWh of latest buckets in window
     val=totalKwh.toFixed(4);
     label='kWh (1 hour)';
-    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'')+' · latest interval';
-
+    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'');
   } else if(typeof tf==='string'&&tf.startsWith('day:')){
-    // Specific calendar day — total kWh for that day's collected data
-    const dayDate=tf.slice(4);
-    const hours=[...new Set(rows.map(r=>r.rtc?r.rtc.slice(0,2):null).filter(Boolean))].length;
-    const partial=hours>0&&hours<24;
-    val=totalKwh.toFixed(3);
-    label=partial?'kWh (partial day)':'kWh (full day)';
-    sub=dayDate+(hours>0?' · '+hours+'h':'')+(partial?' accumulated':' total')+' · '+bucketCount+' buckets';
-
+    val=totalKwh.toFixed(4);
+    label='kWh (1 day)';
+    sub=bucketCount+' bucket'+(bucketCount!==1?'s':'');
   } else if(tf===10080){
-    // 1 week — kWh/day avg
     val=(totalKwh/numDays).toFixed(3);
     label='kWh/day avg';
-    sub='1 week · '+numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
-
+    sub=numDays+' day'+(numDays!==1?'s':'');
   } else if(tf===43200){
-    // 1 month — kWh/day avg
     val=(totalKwh/numDays).toFixed(3);
     label='kWh/day avg';
-    sub='1 month · '+numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
-
+    sub=numDays+' day'+(numDays!==1?'s':'');
   } else if(tf===525600){
-    // 1 year — kWh/week avg
     const weeks=Math.max(1,Math.ceil(numDays/7));
     val=(totalKwh/weeks).toFixed(3);
     label='kWh/week avg';
-    sub='1 year · '+weeks+' wk'+(weeks!==1?'s':'')+' ('+numDays+'d) · '+bucketCount+' buckets';
-
-  } else if(typeof tf==='string'&&tf.startsWith('range:')){
-    // Custom date range — kWh/day avg
-    val=(totalKwh/numDays).toFixed(3);
-    label='kWh/day avg';
-    sub=numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
-
+    sub=weeks+' week'+(weeks!==1?'s':'');
   } else {
-    // All data — kWh/day avg
+    // Range and All
     val=(totalKwh/numDays).toFixed(3);
     label='kWh/day avg';
-    sub=numDays+' day'+(numDays!==1?'s':'')+' · '+bucketCount+' buckets';
+    sub=numDays+' day'+(numDays!==1?'s':'');
   }
 
   set('s-avg-kwh', val);
