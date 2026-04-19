@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
 <link rel="manifest" href="manifest.json">
-<title>CTS Rulez — Energy Eye Live Testing</title>
+<title>CTS Rulez — Energy Eye Live Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -220,7 +220,7 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
 
 <div id="splash">
   <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" rx="18" fill="#1a2550"/><text x="48" y="57" font-family="Arial Black,Arial,sans-serif" font-size="34" font-weight="900" fill="white" text-anchor="middle">CTS</text><circle cx="10" cy="32" r="5" fill="none" stroke="#6abf4b" stroke-width="3.5"/></svg>
-  <div style="font-size:20px;font-weight:600;">CTS Rulez — Energy Eye Live Testing</div>
+  <div style="font-size:20px;font-weight:600;">CTS Rulez — Energy Eye Live Dashboard</div>
   <button class="splash-btn" onclick="pickFile()">Select teraterm.log</button>
 </div>
 
@@ -231,7 +231,7 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
       <div class="logo-icon"><svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" width="36" height="36"><rect width="36" height="36" rx="8" fill="#1a2550"/><text x="22" y="27" font-family="Arial Black,Arial,sans-serif" font-size="15" font-weight="900" fill="white" text-anchor="middle">CTS</text><circle cx="5" cy="14" r="2.2" fill="none" stroke="#6abf4b" stroke-width="1.8"/></svg></div>
       <div>
         <div class="logo-text">CTS Rulez — Energy Eye Live</div>
-        <div class="logo-sub" id="logoSub">energy-test · energyintervention@gmail.com · 2026</div>
+        <div class="logo-sub" id="logoSub">energy-test-001 · 1 pulse = 1 Wh · TNB tariff July 2025</div>
       </div>
     </div>
     <div class="hdr-right">
@@ -268,6 +268,13 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
         <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">TNB Account No.</div><input id="setupAccNo" type="text" placeholder="e.g. 7100012345678" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--mono);"></div>
         <div style="grid-column:span 2;"><div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">Site Address</div><input id="setupAddress" type="text" placeholder="e.g. No. 12, Jalan Maju, 55100 KL" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--sans);"></div>
       </div>
+      <div style="font-size:10px;font-weight:600;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;margin-top:4px;">3 &middot; GPS Location <span style="color:var(--muted);font-weight:400;">(optional)</span></div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+        <input id="setupLat" type="text" placeholder="Lat e.g. 3.1390" style="flex:1;min-width:100px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--mono);">
+        <input id="setupLng" type="text" placeholder="Lng e.g. 101.6869" style="flex:1;min-width:100px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--mono);">
+        <button onclick="getGPS()" style="background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3);border-radius:5px;padding:5px 10px;font-size:10px;font-family:var(--mono);cursor:pointer;white-space:nowrap;">&#128205; Find Me</button>
+      </div>
+      <div id="gpsStatus" style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:14px;min-height:13px;"></div>
       <button onclick="applySetup()" style="background:var(--accent);color:#000;border:none;border-radius:7px;padding:8px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);">&#10003; Apply</button>
       <span id="setupApplied" style="font-size:11px;color:var(--success);font-family:var(--mono);margin-left:10px;display:none;">&#10003; Saved</span>
     </div>
@@ -401,10 +408,9 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
         <option value="active">Pulse &gt; 0</option>
         <option value="zero">No pulse</option>
         <option value="unusual">Unusual only</option>
-        <option value="peak">Peak hours</option>
-        <option value="offpeak">Off-peak</option>
       </select>
       <select class="t-sel" id="hiFilter" onchange="applyFilter()"><option value="all">All HI</option></select>
+      <select class="t-sel" id="loFilter" onchange="applyFilter()"><option value="all">All LO</option></select>
       <select class="t-sel" id="dateFilter" onchange="applyFilter()"><option value="all">All dates</option></select>
       <label style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:auto;display:flex;align-items:center;gap:5px;">
         <input type="checkbox" id="latestFirst" checked onchange="applyFilter()"> Latest first
@@ -416,7 +422,7 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
           <th>#</th><th>Date</th><th>RTC (MYT)</th><th>Log TS</th>
           <th>HI</th><th>LO</th><th>hw</th><th>d</th>
           <th>Pulse</th><th>Wh</th><th>kWh Total</th>
-          <th>Period</th><th>Flag</th><th>Dur</th>
+          <th>Flag</th><th>Dur</th>
         </tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
@@ -1888,12 +1894,22 @@ function applySetup(){
   siteInfo.name=(document.getElementById('setupCustomerName')||{value:''}).value.trim();
   siteInfo.accNo=(document.getElementById('setupAccNo')||{value:''}).value.trim();
   siteInfo.address=(document.getElementById('setupAddress')||{value:''}).value.trim();
+  siteInfo.lat=(document.getElementById('setupLat')||{value:''}).value.trim();
+  siteInfo.lng=(document.getElementById('setupLng')||{value:''}).value.trim();
   var wh2=(1000/PULSE_PER_KWH).toFixed(4).replace(/\.?0+$/,'');
   if(siteInfo.name) set('logoSub',siteInfo.name+' \u00b7 1 pulse = '+wh2+' Wh \u00b7 TNB tariff July 2025');
   set('cardName',siteInfo.name||'\u2014');
   set('cardAddress',siteInfo.address||'\u2014');
   set('cardAccNo',siteInfo.accNo||'\u2014');
   set('cardPulse',PULSE_PER_KWH+' pulses = 1 kWh (1 pulse = '+wh2+' Wh)');
+  var gpsWrap=document.getElementById('cardGpsWrap');
+  var gpsLink=document.getElementById('cardGps');
+  if(siteInfo.lat&&siteInfo.lng){
+    if(gpsWrap) gpsWrap.style.display='block';
+    if(gpsLink){gpsLink.textContent=siteInfo.lat+', '+siteInfo.lng;gpsLink.href='https://maps.google.com/?q='+siteInfo.lat+','+siteInfo.lng;}
+  } else {
+    if(gpsWrap) gpsWrap.style.display='none';
+  }
   var card=document.getElementById('siteInfoCard');
   if(card) card.style.display=(siteInfo.name||siteInfo.address||siteInfo.accNo)?'block':'none';
   if(allData.length) processText(_lastText);
@@ -1936,15 +1952,17 @@ function applyFilter(){
   var q=(document.getElementById('filterInput')||{value:''}).value.toLowerCase();
   var pf=(document.getElementById('pulseFilter')||{value:'all'}).value;
   var hf=(document.getElementById('hiFilter')||{value:'all'}).value;
+  var lf=(document.getElementById('loFilter')||{value:'all'}).value;
   var df=(document.getElementById('dateFilter')||{value:'all'}).value;
   var rev=document.getElementById('latestFirst') ? document.getElementById('latestFirst').checked : true;
   var threshold=calcUnusualThreshold(allData);
   filtered=allData.filter(function(r){
     var mQ=!q||String(r.date||'').includes(q)||String(r.rtc||'').includes(q)||String(r.HI).includes(q)||String(r.p).includes(q);
-    var mP=pf==='all'||(pf==='active'&&r.p>0)||(pf==='zero'&&r.p===0)||(pf==='unusual'&&r.p>threshold)||(pf==='peak'&&r.isPeak)||(pf==='offpeak'&&!r.isPeak);
+    var mP=pf==='all'||(pf==='active'&&r.p>0)||(pf==='zero'&&r.p===0)||(pf==='unusual'&&r.p>threshold);
     var mH=hf==='all'||String(r.HI)===hf;
+    var mL=lf==='all'||String(r.LO)===lf;
     var mD=df==='all'||r.date===df;
-    return mQ&&mP&&mH&&mD;
+    return mQ&&mP&&mH&&mL&&mD;
   });
   if(rev) filtered=filtered.slice().reverse();
   tablePageNum=0;
@@ -1952,6 +1970,10 @@ function applyFilter(){
   var hiVals=[...new Set(allData.map(function(r){return r.HI;}))].sort(function(a,b){return a-b;});
   var hiSel=document.getElementById('hiFilter');
   if(hiSel){var c=hiSel.value;hiSel.innerHTML='<option value="all">All HI</option>'+hiVals.map(function(v){return '<option value="'+v+'"'+(c==v?' selected':'')+'>'+v+'</option>';}).join('');}
+  // Refresh LO dropdown
+  var loVals=[...new Set(allData.map(function(r){return r.LO;}))].sort(function(a,b){return a-b;});
+  var loSel=document.getElementById('loFilter');
+  if(loSel){var cl=loSel.value;loSel.innerHTML='<option value="all">All LO</option>'+loVals.map(function(v){return '<option value="'+v+'"'+(cl==v?' selected':'')+'>'+v+'</option>';}).join('');}
   // Refresh date dropdown
   var dates=[...new Set(allData.map(function(r){return r.date;}).filter(Boolean))];
   var dSel=document.getElementById('dateFilter');
@@ -1985,7 +2007,6 @@ function renderTable(){
       +'<td><span class="pill '+pC+'">'+r.p+'</span></td>'
       +'<td><span class="pill p-kwh">'+r.wh.toFixed(0)+'Wh</span></td>'
       +'<td style="color:var(--muted);font-size:10px;">'+r.kwhTotal.toFixed(4)+'</td>'
-      +'<td>'+perH+'</td>'
       +'<td>'+flagH+'</td>'
       +'<td style="color:var(--muted);">'+r.t+'s</td>'
       +'</tr>';
@@ -2008,5 +2029,25 @@ function renderTable(){
     for(var i=s;i<e;i++) mk(i+1,i,i===tablePageNum);
     if(tablePageNum<total-1) mk('›',tablePageNum+1,false);
   }
+}
+// ── GPS LOCATOR ───────────────────────────────────────────────────────────
+function getGPS(){
+  var st=document.getElementById('gpsStatus');
+  if(!st) return;
+  st.style.color='var(--warn)';st.textContent='Requesting location\u2026';
+  if(!navigator.geolocation){st.style.color='var(--danger)';st.textContent='Geolocation not supported by this browser.';return;}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude.toFixed(6);
+    var lng=pos.coords.longitude.toFixed(6);
+    var latEl=document.getElementById('setupLat');
+    var lngEl=document.getElementById('setupLng');
+    if(latEl) latEl.value=lat;
+    if(lngEl) lngEl.value=lng;
+    st.style.color='var(--success)';
+    st.textContent='\u2713 Located: '+lat+', '+lng+' (\u00b1'+Math.round(pos.coords.accuracy)+'m)';
+  },function(){
+    st.style.color='var(--danger)';
+    st.textContent='Location denied or unavailable. Enter coordinates manually.';
+  },{enableHighAccuracy:true,timeout:10000});
 }
 </script>
