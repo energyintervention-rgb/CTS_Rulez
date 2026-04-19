@@ -197,9 +197,9 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
       </div>
       <div style="font-size:10px;font-weight:600;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">2 &middot; Customer / Site Info</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">
-        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">Customer Name</div><input id="setupCustomerName" type="text" placeholder="e.g. Ahmad bin Ali" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--sans);"></div>
-        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">TNB Account No.</div><input id="setupAccNo" type="text" placeholder="e.g. 7100012345678" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--mono);"></div>
-        <div style="grid-column:span 2;"><div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">Site Address</div><input id="setupAddress" type="text" placeholder="e.g. No. 12, Jalan Maju, 55100 KL" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--sans);"></div>
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">Customer Name <span style="color:var(--muted);font-size:9px;" id="nameCount">0/40</span></div><input id="setupCustomerName" type="text" maxlength="40" placeholder="e.g. Ahmad bin Ali" oninput="document.getElementById('nameCount').textContent=this.value.length+'/40'" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--sans);"></div>
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">TNB Account No. <span style="color:var(--muted);font-size:9px;" id="accCount">0/16</span></div><input id="setupAccNo" type="text" maxlength="16" placeholder="e.g. 7100012345678" oninput="document.getElementById('accCount').textContent=this.value.length+'/16'" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--mono);"></div>
+        <div style="grid-column:span 2;"><div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:3px;">Site Address <span style="color:var(--muted);font-size:9px;" id="addrCount">0/80</span></div><input id="setupAddress" type="text" maxlength="80" placeholder="e.g. No. 12, Jalan Maju, 55100 KL" oninput="document.getElementById('addrCount').textContent=this.value.length+'/80'" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;font-family:var(--sans);"></div>
       </div>
       <div style="font-size:10px;font-weight:600;color:var(--accent);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;margin-top:4px;">3 &middot; GPS Location <span style="color:var(--muted);font-weight:400;">(optional)</span></div>
       <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
@@ -216,9 +216,9 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
   <div id="siteInfoCard" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:12px;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <div style="display:flex;gap:24px;flex-wrap:wrap;flex:1;">
-        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Customer</div><div id="cardName" style="font-size:13px;font-weight:600;color:var(--text);">&#8212;</div></div>
-        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Address</div><div id="cardAddress" style="font-size:12px;color:var(--text);max-width:300px;line-height:1.4;">&#8212;</div></div>
-        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">TNB Acc No.</div><div id="cardAccNo" style="font-size:12px;font-family:var(--mono);color:var(--accent);">&#8212;</div></div>
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Customer</div><div id="cardName" title="" style="font-size:13px;font-weight:600;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">&#8212;</div></div>
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Address</div><div id="cardAddress" title="" style="font-size:12px;color:var(--text);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">&#8212;</div></div>
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">TNB Acc No.</div><div id="cardAccNo" title="" style="font-size:12px;font-family:var(--mono);color:var(--accent);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">&#8212;</div></div>
         <div id="cardGpsWrap" style="display:none;"><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">GPS</div><a id="cardGps" href="#" target="_blank" style="font-size:11px;font-family:var(--mono);color:#60a5fa;text-decoration:none;">&#8212;</a></div>
         <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Pulse Rate</div><div id="cardPulse" style="font-size:12px;font-family:var(--mono);color:var(--accent);">&#8212;</div></div>
         <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Device</div>
@@ -1000,6 +1000,12 @@ function toggleSetupPanel(){
   var collapsed=body.style.display==='none';
   body.style.display=collapsed?'block':'none';
   btn.textContent=collapsed?'\u25b2 Collapse':'\u25bc Expand';
+  // Refresh character counters when opening
+  if(collapsed){
+    var n=document.getElementById('setupCustomerName');var nc=document.getElementById('nameCount');if(n&&nc)nc.textContent=n.value.length+'/40';
+    var a=document.getElementById('setupAccNo');var ac=document.getElementById('accCount');if(a&&ac)ac.textContent=a.value.length+'/16';
+    var d=document.getElementById('setupAddress');var dc=document.getElementById('addrCount');if(d&&dc)dc.textContent=d.value.length+'/80';
+  }
 }
 
 function applySetup(){
@@ -1025,6 +1031,10 @@ function applySetup(){
   set('cardName',siteInfo.name||'\u2014');
   set('cardAddress',siteInfo.address||'\u2014');
   set('cardAccNo',siteInfo.accNo||'\u2014');
+  // Set title for hover tooltip on truncated fields
+  var elName=document.getElementById('cardName');if(elName) elName.title=siteInfo.name||'';
+  var elAddr=document.getElementById('cardAddress');if(elAddr) elAddr.title=siteInfo.address||'';
+  var elAcc=document.getElementById('cardAccNo');if(elAcc) elAcc.title=siteInfo.accNo||'';
   set('cardPulse',PULSE_PER_KWH+' pulses = 1 kWh (1 pulse = '+wh2+' Wh)');
   var gpsWrap=document.getElementById('cardGpsWrap');
   var gpsLink=document.getElementById('cardGps');
