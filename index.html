@@ -59,6 +59,9 @@ canvas{background:transparent !important;}
 .leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
 
 /* unusual alert */
+.alert-card{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px 14px;margin-bottom:12px;display:none;}
+.alert-card.show{display:block;}
+.alert-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:#f87171;font-family:var(--mono);margin-bottom:6px;}
 
 /* table */
 .table-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px;}
@@ -290,10 +293,8 @@ body:has(#splash:not(.hidden)) #dsp-fab{display:none!important;}
             <tr style="border-bottom:1px solid rgba(239,68,68,.25);">
               <th style="text-align:left;padding:5px 8px;color:#f87171;font-size:10px;">Time (MYT)</th>
               <th style="text-align:left;padding:5px 8px;color:#f87171;font-size:10px;">Log TS</th>
-              
               <th style="text-align:right;padding:5px 8px;color:#f87171;font-size:10px;">Pulse</th>
               <th style="text-align:right;padding:5px 8px;color:#f87171;font-size:10px;">Energy (Wh)</th>
-              <th style="text-align:right;padding:5px 8px;color:#f87171;font-size:10px;">Period</th>
               <th style="text-align:right;padding:5px 8px;color:#f87171;font-size:10px;">HI</th>
               <th style="text-align:right;padding:5px 8px;color:#f87171;font-size:10px;">LO</th>
             </tr>
@@ -696,6 +697,7 @@ function processText(text){
     }catch(e){ logCrash('processText',e); }
   try{ updateCharts(); }catch(e){ logCrash('updateCharts',e); }
   try{ updateDeviceStatus(_lastText); }catch(e){ logCrash('updateDeviceStatus',e); }
+  try{ updateAlertCard(); }catch(e){ logCrash('updateAlertCard',e); }
   try{ if(typeof applyFilter==='function') applyFilter(); }catch(e){ logCrash('applyFilter',e); }
 }
 
@@ -1170,5 +1172,59 @@ function getGPS(){
     st.style.color='var(--danger)';
     st.textContent='Location denied or unavailable. Enter coordinates manually.';
   },{enableHighAccuracy:true,timeout:10000});
+}
+// ── UNUSUAL ALERT CARD ───────────────────────────────────────────────────
+function updateAlertCard(){
+  const card=document.getElementById('alertCard');
+  const tbody=document.getElementById('alertTableBody');
+  const sumEl=document.getElementById('alertSummary');
+  const moreEl=document.getElementById('alertMore');
+  if(!card||!tbody||!sumEl||!moreEl) return;
+
+  const threshold=calcUnusualThreshold(allData);
+
+  // all buckets in last 15 min
+  let lastTs=null;
+  for(let i=allData.length-1;i>=0;i--){
+    if(allData[i].log_ts){lastTs=parseLogTs(allData[i].log_ts);break;}
+  }
+  const all15=lastTs!=null ? allData.filter(function(r){
+    return r.log_ts && (lastTs-parseLogTs(r.log_ts))*1000<=15*60*1000;
+  }) : [];
+
+  const unusual15=all15.filter(function(r){return r.p>threshold;})
+    .sort(function(a,b){return b.p-a.p;});
+
+  if(unusual15.length){
+    card.classList.add('show');
+    const totalWh=unusual15.reduce(function(s,r){return s+r.wh;},0);
+    const maxPulse=unusual15[0].p;
+    const rest=unusual15.length-5;
+    sumEl.innerHTML=
+      '<span style="font-size:11px;font-family:var(--mono);background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25);padding:3px 10px;border-radius:5px;">'
+      +'\u26a0 '+unusual15.length+' unusual bucket'+(unusual15.length>1?'s':'')+'</span> '
+      +'<span style="font-size:11px;font-family:var(--mono);background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.25);padding:3px 10px;border-radius:5px;">Total: '+totalWh.toFixed(0)+' Wh</span> '
+      +'<span style="font-size:11px;font-family:var(--mono);background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);padding:3px 10px;border-radius:5px;">Max pulse: '+maxPulse+'</span> '
+      +'<span style="font-size:11px;font-family:var(--mono);color:var(--muted);">threshold: >'+threshold+' p</span>';
+
+    tbody.innerHTML=unusual15.slice(0,5).map(function(r){
+      return '<tr style="border-bottom:1px solid rgba(239,68,68,.1);">'
+        +'<td style="padding:5px 8px;color:#fbbf24;">'+(r.rtc||'\u2014')+'</td>'
+        +'<td style="padding:5px 8px;color:var(--accent);font-size:10px;font-family:var(--mono);">'+(r.log_ts||'\u2014')+'</td>'
+        +'<td style="padding:5px 8px;text-align:right;"><span style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:4px;padding:1px 7px;font-weight:600;font-family:var(--mono);font-size:10px;">'+r.p+'</span></td>'
+        +'<td style="padding:5px 8px;text-align:right;"><span style="background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:10px;">'+r.wh.toFixed(0)+' Wh</span></td>'
+        +'<td style="padding:5px 8px;text-align:right;color:var(--muted);font-size:11px;">'+r.HI+'</td>'
+        +'<td style="padding:5px 8px;text-align:right;color:var(--muted);font-size:11px;">'+r.LO+'</td>'
+        +'</tr>';
+    }).join('');
+
+    if(rest>0){moreEl.style.display='block';moreEl.textContent='\u2026and '+rest+' more unusual bucket'+(rest>1?'s':'')+' in last 15 min';}
+    else{moreEl.style.display='none';}
+  } else {
+    card.classList.remove('show');
+    tbody.innerHTML='';
+    sumEl.innerHTML='';
+    moreEl.style.display='none';
+  }
 }
 </script>
